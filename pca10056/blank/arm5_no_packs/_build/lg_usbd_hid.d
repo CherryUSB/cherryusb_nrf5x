@@ -1,0 +1,12 @@
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\class\hid\lg_usbd_hid.c
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\core\lg_usbd_core.h
+.\_build\lg_usbd_hid.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdint.h
+.\_build\lg_usbd_hid.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdbool.h
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\common\lg_usb_util.h
+.\_build\lg_usbd_hid.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\string.h
+.\_build\lg_usbd_hid.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdio.h
+.\_build\lg_usbd_hid.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdlib.h
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\common\lg_usb_slist.h
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\common\lg_usb_def.h
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\common\lg_usb_dc.h
+.\_build\lg_usbd_hid.o: ..\..\..\usb_stack\class\hid\lg_usbd_hid.h

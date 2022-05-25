@@ -1,0 +1,15 @@
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\port\nrf5x\usb_dc_nrf5x.c
+.\_build\usb_dc_nrf5x.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdlib.h
+.\_build\usb_dc_nrf5x.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdint.h
+.\_build\usb_dc_nrf5x.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdbool.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_dc.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\core\usbd_core.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_util.h
+.\_build\usb_dc_nrf5x.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\string.h
+.\_build\usb_dc_nrf5x.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdio.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_errno.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_list.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_mem.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\common\usb_def.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\usb_config.h
+.\_build\usb_dc_nrf5x.o: ..\..\..\CherryUSB\port\nrf5x\./nrf5x_regs.h

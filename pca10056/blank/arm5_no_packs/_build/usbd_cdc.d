@@ -1,0 +1,16 @@
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\class\cdc\usbd_cdc.c
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\core\usbd_core.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_util.h
+.\_build\usbd_cdc.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdbool.h
+.\_build\usbd_cdc.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\string.h
+.\_build\usbd_cdc.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdint.h
+.\_build\usbd_cdc.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdio.h
+.\_build\usbd_cdc.o: E:\software\Keil\Pro\ARM\ARMCC\Bin\..\include\stdlib.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_errno.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_list.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_mem.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_def.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\common\usb_dc.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\usb_config.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\class\cdc\usbd_cdc.h
+.\_build\usbd_cdc.o: ..\..\..\CherryUSB\class\cdc\usb_cdc.h
