@@ -1,36 +1,10 @@
-/**
- * @file usb_util.h
- * @brief
+/*
+ * Copyright (c) 2022, sakumisu
  *
- * Copyright (c) 2022 sakumisu
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _USB_UTIL_H
-#define _USB_UTIL_H
-
-#include <stdbool.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "usb_errno.h"
-#include "usb_list.h"
-#include "usb_mem.h"
+#ifndef USB_UTIL_H
+#define USB_UTIL_H
 
 #if defined(__CC_ARM)
 #ifndef __USED
@@ -147,23 +121,11 @@
 #define HI_BYTE(x) ((uint8_t)((x & 0xFF00) >> 8))
 #endif
 
-/**
- * @def MAX
- * @brief The larger value between @p a and @p b.
- * @note Arguments are evaluated twice.
- */
 #ifndef MAX
-/* Use Z_MAX for a GCC-only, single evaluation version */
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-/**
- * @def MIN
- * @brief The smaller value between @p a and @p b.
- * @note Arguments are evaluated twice.
- */
 #ifndef MIN
-/* Use Z_MIN for a GCC-only, single evaluation version */
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
@@ -217,13 +179,6 @@
         (field)[3] = (uint8_t)((value) >> 0);  \
     } while (0)
 
-#define REQTYPE_GET_DIR(x)   (((x) >> 7) & 0x01)
-#define REQTYPE_GET_TYPE(x)  (((x) >> 5) & 0x03U)
-#define REQTYPE_GET_RECIP(x) ((x)&0x1F)
-
-#define GET_DESC_TYPE(x)  (((x) >> 8) & 0xFFU)
-#define GET_DESC_INDEX(x) ((x)&0xFFU)
-
 #define WBVAL(x) (x & 0xFF), ((x >> 8) & 0xFF)
 #define DBVAL(x) (x & 0xFF), ((x >> 8) & 0xFF), ((x >> 16) & 0xFF), ((x >> 24) & 0xFF)
 
@@ -248,78 +203,4 @@
         19, 18, 17, 16, 15, 14, 13, 12, 11, 10, \
         9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 
-#define USB_DESC_SECTION __attribute__((section("usb_desc"))) __USED __ALIGNED(1)
-
-/* DEBUG level */
-#define USB_DBG_ERROR   0
-#define USB_DBG_WARNING 1
-#define USB_DBG_INFO    2
-#define USB_DBG_LOG     3
-
-#ifndef USB_DBG_LEVEL
-#define USB_DBG_LEVEL USB_DBG_INFO
-#endif
-
-#ifndef USB_DBG_TAG
-#define USB_DBG_TAG "USB"
-#endif
-/*
- * The color for terminal (foreground)
- * BLACK    30
- * RED      31
- * GREEN    32
- * YELLOW   33
- * BLUE     34
- * PURPLE   35
- * CYAN     36
- * WHITE    37
- */
-#define _USB_PRINTF printf
-//#define _USB_PRINTF(...)
-#define _USB_DBG_COLOR(n) _USB_PRINTF("\033[" #n "m")
-#define _USB_DBG_LOG_HDR(lvl_name, color_n) \
-    _USB_PRINTF("\033[" #color_n "m[" lvl_name "/" USB_DBG_TAG "] ")
-#define _USB_DBG_LOG_X_END \
-    _USB_PRINTF("\033[0m")
-
-#define usb_dbg_log_line(lvl, color_n, fmt, ...) \
-    do {                                         \
-        _USB_DBG_LOG_HDR(lvl, color_n);          \
-        _USB_PRINTF(fmt, ##__VA_ARGS__);              \
-        _USB_DBG_LOG_X_END;                      \
-    } while (0)
-
-#if (USB_DBG_LEVEL >= USB_DBG_LOG)
-#define USB_LOG_DBG(fmt, ...) usb_dbg_log_line("D", 0, fmt, ##__VA_ARGS__)
-#else
-#define USB_LOG_DBG(...)
-#endif
-
-#if (USB_DBG_LEVEL >= USB_DBG_INFO)
-#define USB_LOG_INFO(fmt, ...) usb_dbg_log_line("I", 32, fmt, ##__VA_ARGS__)
-#else
-#define USB_LOG_INFO(...)
-#endif
-
-#if (USB_DBG_LEVEL >= USB_DBG_WARNING)
-#define USB_LOG_WRN(fmt, ...) usb_dbg_log_line("W", 33, fmt, ##__VA_ARGS__)
-#else
-#define USB_LOG_WRN(...)
-#endif
-
-#if (USB_DBG_LEVEL >= USB_DBG_ERROR)
-#define USB_LOG_ERR(fmt, ...) usb_dbg_log_line("E", 31, fmt, ##__VA_ARGS__)
-#else
-#define USB_LOG_ERR(...)
-#endif
-
-#define USB_LOG_RAW _USB_PRINTF
-
-void usb_assert(const char *filename, int linenum);
-#define USB_ASSERT(f)                       \
-    do {                                    \
-        if (!(f))                           \
-            usb_assert(__FILE__, __LINE__); \
-    } while (0)
-
-#endif
+#endif /* USB_UTIL_H */

@@ -1,0 +1,17 @@
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\demo\cdc_acm_multi_template.c
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\core\usbd_core.h
+.\_build\cdc_acm_multi_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdbool.h
+.\_build\cdc_acm_multi_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\string.h
+.\_build\cdc_acm_multi_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdint.h
+.\_build\cdc_acm_multi_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdlib.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\usb_config.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_util.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_errno.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_def.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_list.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_mem.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_log.h
+.\_build\cdc_acm_multi_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdio.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\common\usb_dc.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\class\cdc\usbd_cdc.h
+.\_build\cdc_acm_multi_template.o: ..\..\..\CherryUSB\class\cdc\usb_cdc.h

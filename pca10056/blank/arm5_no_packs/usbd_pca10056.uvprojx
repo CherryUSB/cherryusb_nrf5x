@@ -10,7 +10,7 @@
       <TargetName>nrf52840_xxaa</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCCv506u7</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -80,9 +80,9 @@
             <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
+            <UserProg1Name>$KARM\ARMCC\bin\fromelf.exe --bin --output=Bin\@L.bin !L</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -186,6 +186,7 @@
             <RvdsVP>2</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -201,7 +202,7 @@
             <NoZi2>0</NoZi2>
             <NoZi3>0</NoZi3>
             <NoZi4>0</NoZi4>
-            <NoZi5>0</NoZi5>
+            <NoZi5>1</NoZi5>
             <Ro1Chk>0</Ro1Chk>
             <Ro2Chk>0</Ro2Chk>
             <Ro3Chk>0</Ro3Chk>
@@ -211,7 +212,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -301,12 +302,12 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x3fffc</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <StartAddress>0x2003fffc</StartAddress>
+                <Size>0x4</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
@@ -339,7 +340,7 @@
               <MiscControls>--reduce_paths</MiscControls>
               <Define>APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10056 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\config;..\..\..\drv\components;..\..\..\drv\components\drivers_nrf\nrf_soc_nosd;..\..\..\drv\components\libraries\atomic;..\..\..\drv\components\libraries\atomic_fifo;..\..\..\drv\components\libraries\balloc;..\..\..\drv\components\libraries\bsp;..\..\..\drv\components\libraries\button;..\..\..\drv\components\libraries\cli;..\..\..\drv\components\libraries\cli\uart;..\..\..\drv\components\libraries\delay;..\..\..\drv\components\libraries\experimental_section_vars;..\..\..\drv\components\libraries\hardfault;..\..\..\drv\components\libraries\hardfault\nrf52;..\..\..\drv\components\libraries\log;..\..\..\drv\components\libraries\log\src;..\..\..\drv\components\libraries\memobj;..\..\..\drv\components\libraries\mutex;..\..\..\drv\components\libraries\pwr_mgmt;..\..\..\drv\components\libraries\queue;..\..\..\drv\components\libraries\ringbuf;..\..\..\drv\components\libraries\scheduler;..\..\..\drv\components\libraries\sortlist;..\..\..\drv\components\libraries\strerror;..\..\..\drv\components\libraries\timer;..\..\..\drv\components\libraries\util;..\..\..;..\..\..\drv\external\fprintf;..\..\..\drv\integration\nrfx;..\..\..\drv\integration\nrfx\legacy;..\..\..\drv\modules\nrfx;..\..\..\drv\modules\nrfx\drivers\include;..\..\..\drv\modules\nrfx\hal;..\config;..\..\..\drv\modules\nrfx\drivers\src;..\..\..\drv\components\libraries\uart;..\..\..\drv\components\libraries\fifo;..\..\..\CherryUSB\common;..\..\..\CherryUSB\class\msc;..\..\..\CherryUSB\class\cdc;..\..\..\CherryUSB\class\hid;..\..\..\CherryUSB\core;..\..\..\CherryUSB;..\..\..\drv\components\boards</IncludePath>
+              <IncludePath>..\..\..\config;..\..\..\drv\components;..\..\..\drv\components\drivers_nrf\nrf_soc_nosd;..\..\..\drv\components\libraries\atomic;..\..\..\drv\components\libraries\atomic_fifo;..\..\..\drv\components\libraries\balloc;..\..\..\drv\components\libraries\bsp;..\..\..\drv\components\libraries\button;..\..\..\drv\components\libraries\cli;..\..\..\drv\components\libraries\cli\uart;..\..\..\drv\components\libraries\delay;..\..\..\drv\components\libraries\experimental_section_vars;..\..\..\drv\components\libraries\hardfault;..\..\..\drv\components\libraries\hardfault\nrf52;..\..\..\drv\components\libraries\log;..\..\..\drv\components\libraries\log\src;..\..\..\drv\components\libraries\memobj;..\..\..\drv\components\libraries\mutex;..\..\..\drv\components\libraries\pwr_mgmt;..\..\..\drv\components\libraries\queue;..\..\..\drv\components\libraries\ringbuf;..\..\..\drv\components\libraries\scheduler;..\..\..\drv\components\libraries\sortlist;..\..\..\drv\components\libraries\strerror;..\..\..\drv\components\libraries\timer;..\..\..\drv\components\libraries\util;..\..\..;..\..\..\drv\external\fprintf;..\..\..\drv\integration\nrfx;..\..\..\drv\integration\nrfx\legacy;..\..\..\drv\modules\nrfx;..\..\..\drv\modules\nrfx\drivers\include;..\..\..\drv\modules\nrfx\hal;..\config;..\..\..\drv\modules\nrfx\drivers\src;..\..\..\drv\components\libraries\uart;..\..\..\drv\components\libraries\fifo;..\..\..\CherryUSB\common;..\..\..\CherryUSB\class\msc;..\..\..\CherryUSB\class\cdc;..\..\..\CherryUSB\class\hid;..\..\..\CherryUSB\core;..\..\..\CherryUSB;..\..\..\drv\components\boards;..\..\..\drv\components\libraries\bootloader\dfu</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -355,7 +356,7 @@
             <ClangAsOpt>1</ClangAsOpt>
             <VariousControls>
               <MiscControls> --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC1_ENABLED,-DBOARD_PCA10056,-DCONFIG_GPIO_AS_PINRESET,-DDEBUG,-DDEBUG_NRF,-DFLOAT_ABI_HARD,-DNRF52840_XXAA,-D__HEAP_SIZE=8192,-D__STACK_SIZE=8192</MiscControls>
-              <Define> APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10056 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192</Define>
+              <Define>APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10056 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\nrf_soc_nosd;..\..\..\..\..\..\components\libraries\atomic;..\..\..\..\..\..\components\libraries\atomic_fifo;..\..\..\..\..\..\components\libraries\balloc;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\components\libraries\cli;..\..\..\..\..\..\components\libraries\cli\uart;..\..\..\..\..\..\components\libraries\delay;..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\components\libraries\hardfault\nrf52;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\memobj;..\..\..\..\..\..\components\libraries\mutex;..\..\..\..\..\..\components\libraries\pwr_mgmt;..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\components\libraries\ringbuf;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\sortlist;..\..\..\..\..\..\components\libraries\strerror;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\util;..\..\..;..\..\..\..\..\..\external\fnmatch;..\..\..\..\..\..\external\fprintf;..\..\..\..\..\..\external\segger_rtt;..\..\..\..\..\..\integration\nrfx;..\..\..\..\..\..\integration\nrfx\legacy;..\..\..\..\..\..\modules\nrfx;..\..\..\..\..\..\modules\nrfx\drivers\include;..\..\..\..\..\..\modules\nrfx\hal;..\config</IncludePath>
             </VariousControls>
@@ -562,9 +563,65 @@
               </FileOption>
             </File>
             <File>
-              <FileName>hid_custom_keyboard_template.c</FileName>
+              <FileName>cdc_acm_template.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\CherryUSB\demo\hid_custom_keyboard_template.c</FilePath>
+              <FilePath>..\..\..\CherryUSB\demo\cdc_acm_template.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>1</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+            <File>
+              <FileName>cdc_acm_multi_template.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\CherryUSB\demo\cdc_acm_multi_template.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -616,11 +673,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>cdc_acm_template.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\CherryUSB\demo\cdc_acm_template.c</FilePath>
             </File>
           </Files>
         </Group>

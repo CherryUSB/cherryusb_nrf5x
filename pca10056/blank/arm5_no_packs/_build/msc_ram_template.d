@@ -1,0 +1,17 @@
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\demo\msc_ram_template.c
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\core\usbd_core.h
+.\_build\msc_ram_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdbool.h
+.\_build\msc_ram_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\string.h
+.\_build\msc_ram_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdint.h
+.\_build\msc_ram_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdlib.h
+.\_build\msc_ram_template.o: ..\..\..\usb_config.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_util.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_errno.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_def.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_list.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_mem.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_log.h
+.\_build\msc_ram_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdio.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\common\usb_dc.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\class\msc\usbd_msc.h
+.\_build\msc_ram_template.o: ..\..\..\CherryUSB\class\msc\usb_msc.h

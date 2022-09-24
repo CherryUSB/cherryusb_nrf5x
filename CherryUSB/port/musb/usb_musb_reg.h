@@ -8,49 +8,49 @@
 /**
   * @brief Register map for USB0 peripheral (USB0)
   */
-#ifdef USB_MUSB_SUNXI
+#ifdef CONFIG_USB_MUSB_SUNXI
 
 typedef __PACKED_STRUCT {                                    /*!< USB0 Structure                                                        */
   union {
     __IO uint8_t   FIFO0_BYTE;                      /*!< USB FIFO Endpoint 0                                                   */
     __IO uint16_t  FIFO0_HALF;                      /*!< USB FIFO Endpoint 0                                                   */
     __IO uint32_t  FIFO0_WORD;                      /*!< USB FIFO Endpoint 0                                                   */
-  };
+  } FIFO0;
   union {
     __IO uint8_t   FIFO1_BYTE;                      /*!< USB FIFO Endpoint 1                                                   */
     __IO uint16_t  FIFO1_HALF;                      /*!< USB FIFO Endpoint 1                                                   */
     __IO uint32_t  FIFO1_WORD;                      /*!< USB FIFO Endpoint 1                                                   */
-  };
+  } FIFO1;
   union {
     __IO uint8_t   FIFO2_BYTE;                      /*!< USB FIFO Endpoint 2                                                   */
     __IO uint16_t  FIFO2_HALF;                      /*!< USB FIFO Endpoint 2                                                   */
     __IO uint32_t  FIFO2_WORD;                      /*!< USB FIFO Endpoint 2                                                   */
-  };
+  } FIFO2;
   union {
     __IO uint8_t   FIFO3_BYTE;                      /*!< USB FIFO Endpoint 3                                                   */
     __IO uint16_t  FIFO3_HALF;                      /*!< USB FIFO Endpoint 3                                                   */
     __IO uint32_t  FIFO3_WORD;                      /*!< USB FIFO Endpoint 3                                                   */
-  };
+  } FIFO3;
   union {
     __IO uint8_t   FIFO4_BYTE;                      /*!< USB FIFO Endpoint 4                                                   */
     __IO uint16_t  FIFO4_HALF;                      /*!< USB FIFO Endpoint 4                                                   */
     __IO uint32_t  FIFO4_WORD;                      /*!< USB FIFO Endpoint 4                                                   */
-  };
+  } FIFO4;
   union {
     __IO uint8_t   FIFO5_BYTE;                      /*!< USB FIFO Endpoint 5                                                   */
     __IO uint16_t  FIFO5_HALF;                      /*!< USB FIFO Endpoint 5                                                   */
     __IO uint32_t  FIFO5_WORD;                      /*!< USB FIFO Endpoint 5                                                   */
-  };
+  } FIFO5;
   union {
     __IO uint8_t   FIFO6_BYTE;                      /*!< USB FIFO Endpoint 6                                                   */
     __IO uint16_t  FIFO6_HALF;                      /*!< USB FIFO Endpoint 6                                                   */
     __IO uint32_t  FIFO6_WORD;                      /*!< USB FIFO Endpoint 6                                                   */
-  };
+  } FIFO6;
   union {
     __IO uint8_t   FIFO7_BYTE;                      /*!< USB FIFO Endpoint 7                                                   */
     __IO uint16_t  FIFO7_HALF;                      /*!< USB FIFO Endpoint 7                                                   */
     __IO uint32_t  FIFO7_WORD;                      /*!< USB FIFO Endpoint 7                                                   */
-  };
+  } FIFO7;
   union {
     __IO uint8_t   FIFO_BYTE;                      /*!< USB FIFO Endpoint 7                                                   */
     __IO uint16_t  FIFO_HALF;                      /*!< USB FIFO Endpoint 7                                                   */
@@ -166,42 +166,42 @@ typedef struct {                                    /*!< USB0 Structure         
     __IO uint8_t   FIFO0_BYTE;                      /*!< USB FIFO Endpoint 0                                                   */
     __IO uint16_t  FIFO0_HALF;                      /*!< USB FIFO Endpoint 0                                                   */
     __IO uint32_t  FIFO0_WORD;                      /*!< USB FIFO Endpoint 0                                                   */
-  };
+  } FIFO0;
   union {
     __IO uint8_t   FIFO1_BYTE;                      /*!< USB FIFO Endpoint 1                                                   */
     __IO uint16_t  FIFO1_HALF;                      /*!< USB FIFO Endpoint 1                                                   */
     __IO uint32_t  FIFO1_WORD;                      /*!< USB FIFO Endpoint 1                                                   */
-  };
+  } FIFO1;
   union {
     __IO uint8_t   FIFO2_BYTE;                      /*!< USB FIFO Endpoint 2                                                   */
     __IO uint16_t  FIFO2_HALF;                      /*!< USB FIFO Endpoint 2                                                   */
     __IO uint32_t  FIFO2_WORD;                      /*!< USB FIFO Endpoint 2                                                   */
-  };
+  } FIFO2;
   union {
     __IO uint8_t   FIFO3_BYTE;                      /*!< USB FIFO Endpoint 3                                                   */
     __IO uint16_t  FIFO3_HALF;                      /*!< USB FIFO Endpoint 3                                                   */
     __IO uint32_t  FIFO3_WORD;                      /*!< USB FIFO Endpoint 3                                                   */
-  };
+  } FIFO3;
   union {
     __IO uint8_t   FIFO4_BYTE;                      /*!< USB FIFO Endpoint 4                                                   */
     __IO uint16_t  FIFO4_HALF;                      /*!< USB FIFO Endpoint 4                                                   */
     __IO uint32_t  FIFO4_WORD;                      /*!< USB FIFO Endpoint 4                                                   */
-  };
+  } FIFO4;
   union {
     __IO uint8_t   FIFO5_BYTE;                      /*!< USB FIFO Endpoint 5                                                   */
     __IO uint16_t  FIFO5_HALF;                      /*!< USB FIFO Endpoint 5                                                   */
     __IO uint32_t  FIFO5_WORD;                      /*!< USB FIFO Endpoint 5                                                   */
-  };
+  } FIFO5;
   union {
     __IO uint8_t   FIFO6_BYTE;                      /*!< USB FIFO Endpoint 6                                                   */
     __IO uint16_t  FIFO6_HALF;                      /*!< USB FIFO Endpoint 6                                                   */
     __IO uint32_t  FIFO6_WORD;                      /*!< USB FIFO Endpoint 6                                                   */
-  };
+  } FIFO6;
   union {
     __IO uint8_t   FIFO7_BYTE;                      /*!< USB FIFO Endpoint 7                                                   */
     __IO uint16_t  FIFO7_HALF;                      /*!< USB FIFO Endpoint 7                                                   */
     __IO uint32_t  FIFO7_WORD;                      /*!< USB FIFO Endpoint 7                                                   */
-  };
+  } FIFO7;
   __I  uint32_t  RESERVED1[8];
   __IO uint8_t   DEVCTL;                            /*!< USB Device Control                                                    */
   __IO uint8_t   CCONF;                             /*!< USB Common Configuration                                              */
@@ -466,7 +466,7 @@ typedef struct {                                    /*!< USB0 Structure         
   __IO uint32_t  CC;                                /*!< USB Clock Configuration                                               */
 } USB0_Type;
 
-#endif // USB_MUSB_SUNXI
+#endif // CONFIG_USB_MUSB_SUNXI
 
 //*****************************************************************************
 //

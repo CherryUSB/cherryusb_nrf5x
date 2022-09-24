@@ -1,65 +1,10 @@
-/**
- * @file usbd_hid.c
- * @brief
+/*
+ * Copyright (c) 2022, sakumisu
  *
- * Copyright (c) 2022 sakumisu
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "usbd_core.h"
 #include "usbd_hid.h"
-
-#define HID_STATE_IDLE 0
-#define HID_STATE_BUSY 1
-
-struct usbd_hid_cfg_priv {
-    const uint8_t *hid_descriptor;
-    const uint8_t *hid_report_descriptor;
-    uint32_t hid_report_descriptor_len;
-    uint8_t current_intf_num;
-    uint8_t hid_state;
-    uint8_t report;
-    uint8_t idle_state;
-    uint8_t protocol;
-
-    uint8_t (*get_report_callback)(uint8_t report_id, uint8_t report_type);
-    void (*set_report_callback)(uint8_t report_id, uint8_t report_type, uint8_t *report, uint8_t report_len);
-    uint8_t (*get_idle_callback)(uint8_t report_id);
-    void (*set_idle_callback)(uint8_t report_id, uint8_t duration);
-    void (*set_protocol_callback)(uint8_t protocol);
-    uint8_t (*get_protocol_callback)(void);
-
-    usb_slist_t list;
-} usbd_hid_cfg[4];
-
-static usb_slist_t usbd_hid_class_head = USB_SLIST_OBJECT_INIT(usbd_hid_class_head);
-
-static void usbd_hid_reset(void)
-{
-    usb_slist_t *i;
-    usb_slist_for_each(i, &usbd_hid_class_head)
-    {
-        struct usbd_hid_cfg_priv *hid_intf = usb_slist_entry(i, struct usbd_hid_cfg_priv, list);
-        hid_intf->hid_state = HID_STATE_IDLE;
-        hid_intf->report = 0;
-        hid_intf->idle_state = 0;
-        hid_intf->protocol = 0;
-    }
-}
 
 static int hid_custom_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
@@ -72,33 +17,34 @@ static int hid_custom_request_handler(struct usb_setup_packet *setup, uint8_t **
         uint8_t value = (uint8_t)(setup->wValue >> 8);
         uint8_t intf_num = (uint8_t)setup->wIndex;
 
-        struct usbd_hid_cfg_priv *current_hid_intf = NULL;
         usb_slist_t *i;
-        usb_slist_for_each(i, &usbd_hid_class_head)
-        {
-            struct usbd_hid_cfg_priv *hid_intf = usb_slist_entry(i, struct usbd_hid_cfg_priv, list);
+        struct usbd_interface *match_intf = NULL;
 
-            if (hid_intf->current_intf_num == intf_num) {
-                current_hid_intf = hid_intf;
+        usb_slist_for_each(i, &usbd_intf_head)
+        {
+            struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
+
+            if (intf->intf_num == intf_num) {
+                match_intf = intf;
                 break;
             }
         }
 
-        if (current_hid_intf == NULL) {
+        if (match_intf == NULL) {
             return -2;
         }
 
         switch (value) {
             case HID_DESCRIPTOR_TYPE_HID:
                 USB_LOG_INFO("get HID Descriptor\r\n");
-                *data = (uint8_t *)current_hid_intf->hid_descriptor;
-                *len = current_hid_intf->hid_descriptor[0];
+                // *data = (uint8_t *)match_intf->hid_descriptor;
+                // *len = match_intf->hid_descriptor[0];
                 break;
 
             case HID_DESCRIPTOR_TYPE_HID_REPORT:
                 USB_LOG_INFO("get Report Descriptor\r\n");
-                *data = (uint8_t *)current_hid_intf->hid_report_descriptor;
-                *len = current_hid_intf->hid_report_descriptor_len;
+                *data = (uint8_t *)match_intf->hid_report_descriptor;
+                *len = match_intf->hid_report_descriptor_len;
                 break;
 
             case HID_DESCRIPTOR_TYPE_HID_PHYSICAL:
@@ -116,67 +62,39 @@ static int hid_custom_request_handler(struct usb_setup_packet *setup, uint8_t **
     return -1;
 }
 
-static int hid_class_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
+static int hid_class_interface_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
     USB_LOG_DBG("HID Class request: "
                 "bRequest 0x%02x\r\n",
                 setup->bRequest);
 
-    struct usbd_hid_cfg_priv *current_hid_intf = NULL;
-    usb_slist_t *i;
-    usb_slist_for_each(i, &usbd_hid_class_head)
-    {
-        struct usbd_hid_cfg_priv *hid_intf = usb_slist_entry(i, struct usbd_hid_cfg_priv, list);
-        uint8_t intf_num = (uint8_t)setup->wIndex;
-        if (hid_intf->current_intf_num == intf_num) {
-            current_hid_intf = hid_intf;
-            break;
-        }
-    }
-
-    if (current_hid_intf == NULL) {
-        return -2;
-    }
+    uint8_t intf_num = LO_BYTE(setup->wIndex);
 
     switch (setup->bRequest) {
         case HID_REQUEST_GET_REPORT:
-            if (current_hid_intf->get_report_callback)
-                current_hid_intf->report = current_hid_intf->get_report_callback(LO_BYTE(setup->wValue), HI_BYTE(setup->wValue)); /*report id ,report type*/
-
-            *data = (uint8_t *)&current_hid_intf->report;
+            /* report id ,report type */
+            (*data)[0] = usbh_hid_get_report(intf_num, LO_BYTE(setup->wValue), HI_BYTE(setup->wValue));
             *len = 1;
             break;
         case HID_REQUEST_GET_IDLE:
-            if (current_hid_intf->get_idle_callback)
-                current_hid_intf->idle_state = current_hid_intf->get_idle_callback(LO_BYTE(setup->wValue));
-
-            *data = (uint8_t *)&current_hid_intf->idle_state;
+            (*data)[0] = usbh_hid_get_idle(intf_num, LO_BYTE(setup->wValue));
             *len = 1;
             break;
         case HID_REQUEST_GET_PROTOCOL:
-            if (current_hid_intf->get_protocol_callback)
-                current_hid_intf->protocol = current_hid_intf->get_protocol_callback();
-
-            *data = (uint8_t *)&current_hid_intf->protocol;
+            (*data)[0] = usbh_hid_get_protocol(intf_num);
             *len = 1;
             break;
         case HID_REQUEST_SET_REPORT:
-            if (current_hid_intf->set_report_callback)
-                current_hid_intf->set_report_callback(LO_BYTE(setup->wValue), HI_BYTE(setup->wValue), *data, *len); /*report id ,report type,report,report len*/
-
-            current_hid_intf->report = **data;
+            /* report id ,report type, report, report len */
+            usbh_hid_set_report(intf_num, LO_BYTE(setup->wValue), HI_BYTE(setup->wValue), *data, *len);
             break;
         case HID_REQUEST_SET_IDLE:
-            if (current_hid_intf->set_idle_callback)
-                current_hid_intf->set_idle_callback(LO_BYTE(setup->wValue), HI_BYTE(setup->wIndex)); /*report id ,duration*/
-
-            current_hid_intf->idle_state = HI_BYTE(setup->wIndex);
+            /* report id, duration */
+            usbh_hid_set_idle(intf_num, LO_BYTE(setup->wValue), HI_BYTE(setup->wIndex));
             break;
         case HID_REQUEST_SET_PROTOCOL:
-            if (current_hid_intf->set_protocol_callback)
-                current_hid_intf->set_protocol_callback(LO_BYTE(setup->wValue)); /*protocol*/
-
-            current_hid_intf->protocol = LO_BYTE(setup->wValue);
+            /* protocol */
+            usbh_hid_set_protocol(intf_num, LO_BYTE(setup->wValue));
             break;
 
         default:
@@ -187,99 +105,47 @@ static int hid_class_request_handler(struct usb_setup_packet *setup, uint8_t **d
     return 0;
 }
 
-static void hid_notify_handler(uint8_t event, void *arg)
+struct usbd_interface *usbd_hid_alloc_intf(const uint8_t *desc, uint32_t desc_len)
 {
-    switch (event) {
-        case USBD_EVENT_RESET:
-            usbd_hid_reset();
-            break;
-
-        default:
-            break;
-    }
-}
-
-void usbd_hid_add_interface(usbd_class_t *devclass, usbd_interface_t *intf)
-{
-    static usbd_class_t *last_class = NULL;
-    static uint8_t hid_num = 0;
-    if (last_class != devclass) {
-        last_class = devclass;
-        usbd_class_register(devclass);
+    struct usbd_interface *intf = usb_malloc(sizeof(struct usbd_interface));
+    if (intf == NULL) {
+        USB_LOG_ERR("no mem to alloc intf\r\n");
+        return NULL;
     }
 
-    intf->class_handler = hid_class_request_handler;
-    intf->custom_handler = hid_custom_request_handler;
+    intf->class_interface_handler = hid_class_interface_request_handler;
+    intf->class_endpoint_handler = NULL;
     intf->vendor_handler = NULL;
-    intf->notify_handler = hid_notify_handler;
-    usbd_class_add_interface(devclass, intf);
+    intf->notify_handler = NULL;
 
-    usbd_hid_cfg[hid_num].current_intf_num = intf->intf_num;
-    usb_slist_add_tail(&usbd_hid_class_head, &usbd_hid_cfg[hid_num].list);
-    hid_num++;
+    intf->hid_report_descriptor = desc;
+    intf->hid_report_descriptor_len = desc_len;
+    return intf;
 }
 
-void usbd_hid_descriptor_register(uint8_t intf_num, const uint8_t *desc)
+__WEAK uint8_t usbh_hid_get_report(uint8_t intf, uint8_t report_id, uint8_t report_type)
 {
-    // usbd_hid_cfg.hid_descriptor = desc;
+    return 0;
 }
 
-void usbd_hid_report_descriptor_register(uint8_t intf_num, const uint8_t *desc, uint32_t desc_len)
+__WEAK uint8_t usbh_hid_get_idle(uint8_t intf, uint8_t report_id)
 {
-    usb_slist_t *i;
-    usb_slist_for_each(i, &usbd_hid_class_head)
-    {
-        struct usbd_hid_cfg_priv *hid_intf = usb_slist_entry(i, struct usbd_hid_cfg_priv, list);
-
-        if (hid_intf->current_intf_num == intf_num) {
-            hid_intf->hid_report_descriptor = desc;
-            hid_intf->hid_report_descriptor_len = desc_len;
-            return;
-        }
-    }
+    return 0;
 }
 
-void usbd_hid_set_request_callback(uint8_t intf_num,
-                                   uint8_t (*get_report_callback)(uint8_t report_id, uint8_t report_type),
-                                   void (*set_report_callback)(uint8_t report_id, uint8_t report_type, uint8_t *report, uint8_t report_len),
-                                   uint8_t (*get_idle_callback)(uint8_t report_id),
-                                   void (*set_idle_callback)(uint8_t report_id, uint8_t duration),
-                                   void (*set_protocol_callback)(uint8_t protocol),
-                                   uint8_t (*get_protocol_callback)(void))
+__WEAK uint8_t usbh_hid_get_protocol(uint8_t intf)
 {
-    usb_slist_t *i;
-    usb_slist_for_each(i, &usbd_hid_class_head)
-    {
-        struct usbd_hid_cfg_priv *hid_intf = usb_slist_entry(i, struct usbd_hid_cfg_priv, list);
-
-        if (hid_intf->current_intf_num == intf_num) {
-            if (get_report_callback)
-                hid_intf->get_report_callback = get_report_callback;
-            if (set_report_callback)
-                hid_intf->set_report_callback = set_report_callback;
-            if (get_idle_callback)
-                hid_intf->get_idle_callback = get_idle_callback;
-            if (set_idle_callback)
-                hid_intf->set_idle_callback = set_idle_callback;
-            if (set_protocol_callback)
-                hid_intf->set_protocol_callback = set_protocol_callback;
-            if (get_protocol_callback)
-                hid_intf->get_protocol_callback = get_protocol_callback;
-            return;
-        }
-    }
+    return 0;
 }
 
-void usbd_hid_reset_state(void)
+__WEAK void usbh_hid_set_report(uint8_t intf, uint8_t report_id, uint8_t report_type, uint8_t *report, uint8_t report_len)
 {
-    // usbd_hid_cfg.hid_state = HID_STATE_IDLE;
 }
 
-void usbd_hid_send_report(uint8_t ep, uint8_t *data, uint8_t len)
+__WEAK void usbh_hid_set_idle(uint8_t intf, uint8_t report_id, uint8_t duration)
 {
-    // if(usbd_hid_cfg.hid_state == HID_STATE_IDLE)
-    // {
-    //     usbd_hid_cfg.hid_state = HID_STATE_BUSY;
-    //     usbd_ep_write(ep, data, len, NULL);
-    // }
+}
+
+__WEAK void usbh_hid_set_protocol(uint8_t intf, uint8_t protocol)
+{
 }

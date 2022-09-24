@@ -1,0 +1,16 @@
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\demo\hid_custom_keyboard_template.c
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\core\usbd_core.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_util.h
+.\_build\hid_custom_keyboard_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdbool.h
+.\_build\hid_custom_keyboard_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\string.h
+.\_build\hid_custom_keyboard_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdint.h
+.\_build\hid_custom_keyboard_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdio.h
+.\_build\hid_custom_keyboard_template.o: D:\software\Keil\Keil_v5\ARM\ARMCCv506u7\Bin\..\include\stdlib.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_errno.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_list.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_mem.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_def.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\common\usb_dc.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\usb_config.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\class\hid\usbd_hid.h
+.\_build\hid_custom_keyboard_template.o: ..\..\..\CherryUSB\class\hid\usb_hid.h

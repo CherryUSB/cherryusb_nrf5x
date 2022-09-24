@@ -1,15 +1,21 @@
-
-/*
- * Auto generated Run-Time-Environment Configuration File
- *      *** Do not modify ! ***
- *
- * Project: 'usbd_pca10056' 
- * Target:  'nrf52840_xxaa' 
- */
-
-#ifndef RTE_COMPONENTS_H
-#define RTE_COMPONENTS_H
-
-
-
-#endif /* RTE_COMPONENTS_H */
+
+/*
+ * Auto generated Run-Time-Environment Configuration File
+ *      *** Do not modify ! ***
+ *
+ * Project: 'usbd_pca10056' 
+ * Target:  'nrf52840_xxaa' 
+ */
+
+#ifndef RTE_COMPONENTS_H
+#define RTE_COMPONENTS_H
+
+
+/*
+ * Define the Device Header File: 
+ */
+#define CMSIS_device_header "nrf.h"
+
+
+
+#endif /* RTE_COMPONENTS_H */

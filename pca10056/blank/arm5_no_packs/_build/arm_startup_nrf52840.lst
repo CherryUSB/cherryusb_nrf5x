@@ -470,10 +470,10 @@ ponents\libraries\util -I..\..\.. -I..\..\..\..\..\..\external\fnmatch -I..\..\
 ..\..\..\..\external\fprintf -I..\..\..\..\..\..\external\segger_rtt -I..\..\..
 \..\..\..\integration\nrfx -I..\..\..\..\..\..\integration\nrfx\legacy -I..\..\
 ..\..\..\..\modules\nrfx -I..\..\..\..\..\..\modules\nrfx\drivers\include -I..\
-..\..\..\..\..\modules\nrfx\hal -I..\config -I.\RTE\_nrf52840_xxaa -IE:\softwar
-e\Keil\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include -IE:\software\Keil\Packs\Nordic
+..\..\..\..\..\modules\nrfx\hal -I..\config -I.\RTE\_nrf52840_xxaa -ID:\softwar
+e\Keil\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include -ID:\software\Keil\Packs\Nordic
 Semiconductor\nRF_DeviceFamilyPack\8.35.0\Device\Include --predefine="__MICROLI
-B SETA 1" --predefine="__UVISION_VERSION SETA 536" --predefine="_RTE_ SETA 1" -
+B SETA 1" --predefine="__UVISION_VERSION SETA 537" --predefine="_RTE_ SETA 1" -
 -predefine="NRF52840_XXAA SETA 1" --predefine="_RTE_ SETA 1" --predefine="APP_T
 IMER_V2 SETA 1" --predefine="APP_TIMER_V2_RTC1_ENABLED SETA 1" --predefine="BOA
 RD_PCA10056 SETA 1" --predefine="CONFIG_GPIO_AS_PINRESET SETA 1" --predefine="D
@@ -482,7 +482,7 @@ EBUG SETA 1" --predefine="DEBUG_NRF SETA 1" --predefine="FLOAT_ABI_HARD SETA 1"
 fine="__STACK_SIZE SETA 8192" --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC
 1_ENABLED,-DBOARD_PCA10056,-DCONFIG_GPIO_AS_PINRESET,-DDEBUG,-DDEBUG_NRF,-DFLOA
 T_ABI_HARD,-DNRF52840_XXAA,-D__HEAP_SIZE=8192,-D__STACK_SIZE=8192 --list=.\_bui
-ld\arm_startup_nrf52840.lst RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+ld\arm_startup_nrf52840.lst RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 
 
@@ -493,7 +493,7 @@ STACK 00000000
 
 Symbol: STACK
    Definitions
-      At line 42 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 42 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: STACK unused
@@ -501,7 +501,7 @@ Stack_Mem 00000000
 
 Symbol: Stack_Mem
    Definitions
-      At line 43 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 43 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: Stack_Mem unused
@@ -509,10 +509,10 @@ __initial_sp 00002000
 
 Symbol: __initial_sp
    Definitions
-      At line 44 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 44 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 69 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 361 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 69 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 361 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 3 symbols
 
@@ -525,7 +525,7 @@ HEAP 00000000
 
 Symbol: HEAP
    Definitions
-      At line 54 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 54 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: HEAP unused
@@ -533,7 +533,7 @@ Heap_Mem 00000000
 
 Symbol: Heap_Mem
    Definitions
-      At line 56 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 56 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: Heap_Mem unused
@@ -541,17 +541,17 @@ __heap_base 00000000
 
 Symbol: __heap_base
    Definitions
-      At line 55 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 55 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 362 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 362 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: __heap_base used once
 __heap_limit 00002000
 
 Symbol: __heap_limit
    Definitions
-      At line 57 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 57 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 363 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 363 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: __heap_limit used once
 4 symbols
 
@@ -564,7 +564,7 @@ RESET 00000000
 
 Symbol: RESET
    Definitions
-      At line 64 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 64 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: RESET unused
@@ -572,19 +572,19 @@ __Vectors 00000000
 
 Symbol: __Vectors
    Definitions
-      At line 69 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 69 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 65 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 202 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 65 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 202 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 __Vectors_End 00000200
 
 Symbol: __Vectors_End
    Definitions
-      At line 200 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 200 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 66 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 202 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 66 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 202 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 3 symbols
 
@@ -597,7 +597,7 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 204 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 204 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
       None
 Comment: .text unused
@@ -605,52 +605,52 @@ BusFault_Handler 0000000E
 
 Symbol: BusFault_Handler
    Definitions
-      At line 238 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 238 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 74 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 239 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 74 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 239 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 CCM_AAR_IRQHandler 0000001A
 
 Symbol: CCM_AAR_IRQHandler
    Definitions
-      At line 325 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 325 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 102 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 282 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 102 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 282 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 COMP_LPCOMP_IRQHandler 0000001A
 
 Symbol: COMP_LPCOMP_IRQHandler
    Definitions
-      At line 329 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 329 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 106 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 286 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 106 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 286 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 CRYPTOCELL_IRQHandler 0000001A
 
 Symbol: CRYPTOCELL_IRQHandler
    Definitions
-      At line 350 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 350 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 129 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 307 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 129 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 307 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 DebugMon_Handler 00000014
 
 Symbol: DebugMon_Handler
    Definitions
-      At line 252 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 252 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 81 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 253 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 81 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 253 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 Default_Handler 0000001A
 
 Symbol: Default_Handler
    Definitions
-      At line 265 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 265 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
 
 
@@ -664,55 +664,55 @@ ECB_IRQHandler 0000001A
 
 Symbol: ECB_IRQHandler
    Definitions
-      At line 324 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 324 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 101 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 281 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 101 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 281 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 FPU_IRQHandler 0000001A
 
 Symbol: FPU_IRQHandler
    Definitions
-      At line 346 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 346 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 125 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 303 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 125 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 303 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 GPIOTE_IRQHandler 0000001A
 
 Symbol: GPIOTE_IRQHandler
    Definitions
-      At line 316 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 316 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 93 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 273 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 93 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 273 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 HardFault_Handler 0000000A
 
 Symbol: HardFault_Handler
    Definitions
-      At line 228 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 228 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 72 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 229 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 72 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 229 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 I2S_IRQHandler 0000001A
 
 Symbol: I2S_IRQHandler
    Definitions
-      At line 345 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 345 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 124 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 302 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 124 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 302 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 MWU_IRQHandler 0000001A
 
 Symbol: MWU_IRQHandler
    Definitions
-      At line 340 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 340 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 119 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 297 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 119 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 297 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 MemoryManagement_Handler 0000000C
 
@@ -724,64 +724,64 @@ ARM Macro Assembler    Page 3 Alphabetic symbol ordering
 Relocatable symbols
 
    Definitions
-      At line 233 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 233 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 73 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 234 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 73 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 234 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 NFCT_IRQHandler 0000001A
 
 Symbol: NFCT_IRQHandler
    Definitions
-      At line 315 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 315 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 92 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 272 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 92 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 272 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 NMI_Handler 00000008
 
 Symbol: NMI_Handler
    Definitions
-      At line 223 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 223 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 71 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 224 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 71 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 224 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 PDM_IRQHandler 0000001A
 
 Symbol: PDM_IRQHandler
    Definitions
-      At line 339 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 339 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 116 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 296 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 116 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 296 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 POWER_CLOCK_IRQHandler 0000001A
 
 Symbol: POWER_CLOCK_IRQHandler
    Definitions
-      At line 310 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 310 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 87 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 267 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 87 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 267 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 PWM0_IRQHandler 0000001A
 
 Symbol: PWM0_IRQHandler
    Definitions
-      At line 338 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 338 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 115 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 295 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 115 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 295 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 PWM1_IRQHandler 0000001A
 
 Symbol: PWM1_IRQHandler
    Definitions
-      At line 341 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 341 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 120 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 298 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 120 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 298 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 
 
@@ -793,55 +793,55 @@ PWM2_IRQHandler 0000001A
 
 Symbol: PWM2_IRQHandler
    Definitions
-      At line 342 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 342 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 121 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 299 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 121 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 299 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 PWM3_IRQHandler 0000001A
 
 Symbol: PWM3_IRQHandler
    Definitions
-      At line 351 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 351 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 132 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 308 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 132 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 308 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 PendSV_Handler 00000016
 
 Symbol: PendSV_Handler
    Definitions
-      At line 256 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 256 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 83 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 257 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 83 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 257 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 QDEC_IRQHandler 0000001A
 
 Symbol: QDEC_IRQHandler
    Definitions
-      At line 328 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 328 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 105 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 285 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 105 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 285 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 QSPI_IRQHandler 0000001A
 
 Symbol: QSPI_IRQHandler
    Definitions
-      At line 349 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 349 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 128 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 306 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 128 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 306 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 RADIO_IRQHandler 0000001A
 
 Symbol: RADIO_IRQHandler
    Definitions
-      At line 311 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 311 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 88 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 268 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 88 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 268 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 RNG_IRQHandler 0000001A
 
@@ -853,64 +853,64 @@ Symbol: RNG_IRQHandler
 ARM Macro Assembler    Page 5 Alphabetic symbol ordering
 Relocatable symbols
 
-      At line 323 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 323 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 100 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 280 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 100 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 280 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 RTC0_IRQHandler 0000001A
 
 Symbol: RTC0_IRQHandler
    Definitions
-      At line 321 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 321 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 98 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 278 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 98 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 278 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 RTC1_IRQHandler 0000001A
 
 Symbol: RTC1_IRQHandler
    Definitions
-      At line 327 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 327 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 104 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 284 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 104 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 284 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 RTC2_IRQHandler 0000001A
 
 Symbol: RTC2_IRQHandler
    Definitions
-      At line 344 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 344 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 123 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 301 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 123 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 301 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 Reset_Handler 00000000
 
 Symbol: Reset_Handler
    Definitions
-      At line 209 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 209 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 70 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 210 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 70 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 210 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SAADC_IRQHandler 0000001A
 
 Symbol: SAADC_IRQHandler
    Definitions
-      At line 317 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 317 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 94 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 274 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 94 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 274 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler 0000001A
 
 Symbol: SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler
    Definitions
-      At line 313 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 313 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 90 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 270 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 90 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 270 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 
 
@@ -922,61 +922,61 @@ SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler 0000001A
 
 Symbol: SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler
    Definitions
-      At line 314 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 314 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 91 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 271 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 91 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 271 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SPIM2_SPIS2_SPI2_IRQHandler 0000001A
 
 Symbol: SPIM2_SPIS2_SPI2_IRQHandler
    Definitions
-      At line 343 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 343 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 122 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 300 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 122 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 300 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SPIM3_IRQHandler 0000001A
 
 Symbol: SPIM3_IRQHandler
    Definitions
-      At line 352 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 352 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 134 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 309 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 134 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 309 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SVC_Handler 00000012
 
 Symbol: SVC_Handler
    Definitions
-      At line 247 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 247 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 80 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 248 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 80 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 248 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI0_EGU0_IRQHandler 0000001A
 
 Symbol: SWI0_EGU0_IRQHandler
    Definitions
-      At line 330 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 330 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 107 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 287 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 107 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 287 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI1_EGU1_IRQHandler 0000001A
 
 Symbol: SWI1_EGU1_IRQHandler
    Definitions
-      At line 331 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 331 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 108 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 288 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 108 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 288 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI2_EGU2_IRQHandler 0000001A
 
 Symbol: SWI2_EGU2_IRQHandler
    Definitions
-      At line 332 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 332 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 
 
@@ -984,62 +984,62 @@ ARM Macro Assembler    Page 7 Alphabetic symbol ordering
 Relocatable symbols
 
    Uses
-      At line 109 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 289 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 109 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 289 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI3_EGU3_IRQHandler 0000001A
 
 Symbol: SWI3_EGU3_IRQHandler
    Definitions
-      At line 333 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 333 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 110 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 290 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 110 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 290 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI4_EGU4_IRQHandler 0000001A
 
 Symbol: SWI4_EGU4_IRQHandler
    Definitions
-      At line 334 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 334 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 111 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 291 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 111 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 291 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SWI5_EGU5_IRQHandler 0000001A
 
 Symbol: SWI5_EGU5_IRQHandler
    Definitions
-      At line 335 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 335 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 112 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 292 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 112 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 292 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 SysTick_Handler 00000018
 
 Symbol: SysTick_Handler
    Definitions
-      At line 260 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 260 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 84 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 261 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 84 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 261 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TEMP_IRQHandler 0000001A
 
 Symbol: TEMP_IRQHandler
    Definitions
-      At line 322 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 322 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 99 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 279 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 99 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 279 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TIMER0_IRQHandler 0000001A
 
 Symbol: TIMER0_IRQHandler
    Definitions
-      At line 318 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 318 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 95 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 275 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 95 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 275 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TIMER1_IRQHandler 0000001A
 
@@ -1051,61 +1051,61 @@ Relocatable symbols
 
 Symbol: TIMER1_IRQHandler
    Definitions
-      At line 319 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 319 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 96 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 276 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 96 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 276 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TIMER2_IRQHandler 0000001A
 
 Symbol: TIMER2_IRQHandler
    Definitions
-      At line 320 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 320 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 97 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 277 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 97 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 277 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TIMER3_IRQHandler 0000001A
 
 Symbol: TIMER3_IRQHandler
    Definitions
-      At line 336 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 336 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 113 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 293 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 113 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 293 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 TIMER4_IRQHandler 0000001A
 
 Symbol: TIMER4_IRQHandler
    Definitions
-      At line 337 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 337 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 114 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 294 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 114 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 294 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 UARTE0_UART0_IRQHandler 0000001A
 
 Symbol: UARTE0_UART0_IRQHandler
    Definitions
-      At line 312 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 312 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 89 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 269 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 89 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 269 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 UARTE1_IRQHandler 0000001A
 
 Symbol: UARTE1_IRQHandler
    Definitions
-      At line 348 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 348 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 127 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 305 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 127 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 305 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 USBD_IRQHandler 0000001A
 
 Symbol: USBD_IRQHandler
    Definitions
-      At line 347 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 347 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
 
 
@@ -1113,26 +1113,26 @@ Symbol: USBD_IRQHandler
 ARM Macro Assembler    Page 9 Alphabetic symbol ordering
 Relocatable symbols
 
-      At line 126 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 304 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 126 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 304 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 UsageFault_Handler 00000010
 
 Symbol: UsageFault_Handler
    Definitions
-      At line 243 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 243 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 75 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 244 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 75 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 244 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 WDT_IRQHandler 0000001A
 
 Symbol: WDT_IRQHandler
    Definitions
-      At line 326 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 326 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 103 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
-      At line 283 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 103 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
+      At line 283 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 
 55 symbols
 
@@ -1145,33 +1145,33 @@ Heap_Size 00002000
 
 Symbol: Heap_Size
    Definitions
-      At line 49 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 49 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 56 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 56 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: Heap_Size used once
 Stack_Align 00000003
 
 Symbol: Stack_Align
    Definitions
-      At line 39 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 39 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 42 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 42 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: Stack_Align used once
 Stack_Size 00002000
 
 Symbol: Stack_Size
    Definitions
-      At line 31 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 31 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 43 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 43 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: Stack_Size used once
 __Vectors_Size 00000200
 
 Symbol: __Vectors_Size
    Definitions
-      At line 202 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 202 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 67 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 67 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: __Vectors_Size used once
 4 symbols
 
@@ -1184,17 +1184,17 @@ SystemInit 00000000
 
 Symbol: SystemInit
    Definitions
-      At line 211 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 211 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 215 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 215 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: SystemInit used once
 __main 00000000
 
 Symbol: __main
    Definitions
-      At line 212 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 212 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
    Uses
-      At line 217 in file RTE\Device\nRF52840_xxAA\arm_startup_nrf52840.s
+      At line 217 in file RTE/Device/nRF52840_xxAA/arm_startup_nrf52840.s
 Comment: __main used once
 2 symbols
 425 symbols in table

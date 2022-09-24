@@ -1,21 +1,15 @@
 #include "usbd_core.h"
 #include "usbd_hid.h"
 
-#define HID_STATE_IDLE 0
-#define HID_STATE_BUSY 1
-
 /*!< endpoint address */
 #define HID_INT_EP          0x81
-#define HID_INT_EP_SIZE     8
+#define HID_INT_EP_SIZE     4
 #define HID_INT_EP_INTERVAL 10
 
 #define USBD_VID           0xffff
 #define USBD_PID           0xffff
 #define USBD_MAX_POWER     100
 #define USBD_LANGID_STRING 1033
-
-/*!< hid state ! Data can be sent only when state is idle  */
-uint8_t hid_state = HID_STATE_IDLE;
 
 /*!< config descriptor size */
 #define USB_HID_CONFIG_DESC_SIZ 34
@@ -191,30 +185,30 @@ struct hid_mouse {
     int8_t wheel;
 };
 
-/*!< class */
-static usbd_class_t hid_class;
-
-/*!< interface */
-static usbd_interface_t hid_intf;
-
 /*!< mouse report */
 static struct hid_mouse mouse_cfg;
 
-/* function ------------------------------------------------------------------*/
-static void usbd_hid_int_callback(uint8_t ep)
+#define HID_STATE_IDLE 0
+#define HID_STATE_BUSY 1
+
+/*!< hid state ! Data can be sent only when state is idle  */
+static volatile uint8_t hid_state = HID_STATE_IDLE;
+
+void usbd_configure_done_callback(void)
 {
-    /*!< endpoint call back */
-    /*!< transfer successfully */
-    if (hid_state == HID_STATE_BUSY) {
-        /*!< update the state  */
-        hid_state = HID_STATE_IDLE;
-    }
+    /* no out ep, do nothing */
+}
+
+/* function ------------------------------------------------------------------*/
+static void usbd_hid_int_callback(uint8_t ep, uint32_t nbytes)
+{
+    hid_state = HID_STATE_IDLE;
 }
 
 /*!< endpoint call back */
-static usbd_endpoint_t hid_in_ep = {
+static struct usbd_endpoint hid_in_ep = {
     .ep_cb = usbd_hid_int_callback,
-    .ep_addr = 0x81
+    .ep_addr = HID_INT_EP
 };
 
 /* function ------------------------------------------------------------------*/
@@ -227,12 +221,8 @@ static usbd_endpoint_t hid_in_ep = {
 void hid_mouse_init(void)
 {
     usbd_desc_register(hid_descriptor);
-    /*!< add interface */
-    usbd_hid_add_interface(&hid_class, &hid_intf);
-    /*!< interface add endpoint */
-    usbd_interface_add_endpoint(&hid_intf, &hid_in_ep);
-    /*!< register report descriptor */
-    usbd_hid_report_descriptor_register(0, hid_mouse_report_desc, HID_MOUSE_REPORT_DESC_SIZE);
+    usbd_add_interface(usbd_hid_alloc_intf(hid_mouse_report_desc, HID_MOUSE_REPORT_DESC_SIZE));
+    usbd_add_endpoint(&hid_in_ep);
 
     usbd_initialize();
 
@@ -244,37 +234,21 @@ void hid_mouse_init(void)
 }
 
 /**
-  * @brief            device send report to host
-  * @pre              none
-  * @param[in]        ep endpoint address
-  * @param[in]        data Points to the data buffer waiting to be sent
-  * @param[in]        len Length of data to be sent
-  * @retval           none
-  */
-void hid_mouse_send_report(uint8_t ep, uint8_t *data, uint8_t len)
-{
-    if (usb_device_is_configured()) {
-        if (hid_state == HID_STATE_IDLE) {
-            /*!< updata the state */
-            hid_state = HID_STATE_BUSY;
-            /*!< write buffer */
-            usbd_ep_write(ep, data, len, NULL);
-        }
-    }
-}
-
-/**
   * @brief            hid mouse test
   * @pre              none
   * @param[in]        none
   * @retval           none
   */
-void hid_mouse_send_report_test(void)
+void hid_mouse_test(void)
 {
-    /*!< remove mouse pointer */
+    /*!< move mouse pointer */
     mouse_cfg.x += 10;
     mouse_cfg.y = 0;
-    /*!< send repotr to host */
-    hid_mouse_send_report(HID_INT_EP, (uint8_t *)&mouse_cfg, 4);
-    /*!< delay 1000ms */
+    hid_state = HID_STATE_BUSY;
+    int ret = usbd_ep_start_write(HID_INT_EP, (uint8_t *)&mouse_cfg, 4);
+    if (ret < 0) {
+        return;
+    }
+    while (hid_state == HID_STATE_BUSY) {
+    }
 }

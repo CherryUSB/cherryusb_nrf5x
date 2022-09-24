@@ -1,30 +1,11 @@
-/**
- * @file usbd_core.c
- * @brief
+/*
+ * Copyright (C) 2006 Bertrik Sikken (bertrik@sikken.nl)
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2022, sakumisu
  *
- * Copyright (c) 2022 sakumisu
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "usbd_core.h"
-
-#define USBD_EP_CALLBACK_LIST_SEARCH   0
-#define USBD_EP_CALLBACK_ARR_SEARCH    1
-#define USBD_EP_CALLBACK_SEARCH_METHOD USBD_EP_CALLBACK_ARR_SEARCH
 
 /* general descriptor field offsets */
 #define DESC_bLength         0 /** Length offset */
@@ -42,9 +23,9 @@
 #define USB_EP_OUT_NUM 8
 #define USB_EP_IN_NUM  8
 
-struct usbd_core_cfg_priv {
+USB_NOCACHE_RAM_SECTION struct usbd_core_cfg_priv {
     /** Setup packet */
-    USB_MEM_ALIGN32 struct usb_setup_packet setup;
+    USB_MEM_ALIGNX struct usb_setup_packet setup;
     /** Pointer to data buffer */
     uint8_t *ep0_data_buf;
     /** Remaining bytes in buffer */
@@ -56,35 +37,28 @@ struct usbd_core_cfg_priv {
     /** Pointer to registered descriptors */
     const uint8_t *descriptors;
     /* Buffer used for storing standard, class and vendor request data */
-    USB_MEM_ALIGN32 uint8_t req_data[CONFIG_USBDEV_REQUEST_BUFFER_LEN];
+    USB_MEM_ALIGNX uint8_t req_data[CONFIG_USBDEV_REQUEST_BUFFER_LEN];
 
-#if USBD_EP_CALLBACK_SEARCH_METHOD == USBD_EP_CALLBACK_ARR_SEARCH
     usbd_endpoint_callback in_ep_cb[USB_EP_IN_NUM];
     usbd_endpoint_callback out_ep_cb[USB_EP_OUT_NUM];
-#endif
+
     /** Variable to check whether the usb has been configured */
     bool configured;
     /** Currently selected configuration */
     uint8_t configuration;
-    /** Remote wakeup feature status */
-    uint16_t remote_wakeup;
+#ifdef CONFIG_USBDEV_TEST_MODE
+    bool test_mode;
+#endif
 } usbd_core_cfg;
 
-static usb_slist_t usbd_class_head = USB_SLIST_OBJECT_INIT(usbd_class_head);
+usb_slist_t usbd_intf_head = USB_SLIST_OBJECT_INIT(usbd_intf_head);
+
 static struct usb_msosv1_descriptor *msosv1_desc;
 static struct usb_msosv2_descriptor *msosv2_desc;
 static struct usb_bos_descriptor *bos_desc;
 
-#if CONFIG_USBDEV_TEST_MODE
-void usbd_set_feature(uint16_t index, uint16_t value);
-void usbd_clear_feature(uint16_t index, uint16_t value);
-#endif
-/**
- * @brief print the contents of a setup packet
- *
- * @param [in] setup The setup packet
- *
- */
+static void usbd_class_event_notify_handler(uint8_t event, void *arg);
+
 static void usbd_print_setup(struct usb_setup_packet *setup)
 {
     USB_LOG_INFO("Setup: "
@@ -96,93 +70,11 @@ static void usbd_print_setup(struct usb_setup_packet *setup)
                  setup->wLength);
 }
 
-/**
- * @brief Check if the device is in Configured state
- *
- * @return true if Configured, false otherwise.
- */
 static bool is_device_configured(void)
 {
     return (usbd_core_cfg.configuration != 0);
 }
-/**
- * @brief Check if the interface of given number is valid
- *
- * @param [in] interface Number of the addressed interface
- *
- * This function searches through descriptor and checks
- * is the Host has addressed valid interface.
- *
- * @return true if interface exists - valid
- */
-static bool is_interface_valid(uint8_t interface)
-{
-    const uint8_t *p = (uint8_t *)usbd_core_cfg.descriptors;
-    const struct usb_configuration_descriptor *cfg_descr;
 
-    /* Search through descriptor for matching interface */
-    while (p[DESC_bLength] != 0U) {
-        if (p[DESC_bDescriptorType] == USB_DESCRIPTOR_TYPE_CONFIGURATION) {
-            cfg_descr = (const struct usb_configuration_descriptor *)p;
-
-            if (interface < cfg_descr->bNumInterfaces) {
-                return true;
-            }
-        }
-
-        p += p[DESC_bLength];
-    }
-
-    return false;
-}
-/**
- * @brief Check if the endpoint of given address is valid
- *
- * @param [in] ep Address of the Endpoint
- *
- * This function checks if the Endpoint of given address
- * is valid for the configured device. Valid Endpoint is
- * either Control Endpoint or one used by the device.
- *
- * @return true if endpoint exists - valid
- */
-static bool is_ep_valid(uint8_t ep)
-{
-    /* Check if its Endpoint 0 */
-    if ((ep & 0x7f) == 0) {
-        return true;
-    }
-
-    return true;
-}
-#if USBD_EP_CALLBACK_SEARCH_METHOD == USBD_EP_CALLBACK_ARR_SEARCH
-static void usbd_ep_callback_register(void)
-{
-    usb_slist_t *i, *j, *k;
-    usb_slist_for_each(i, &usbd_class_head)
-    {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
-
-        usb_slist_for_each(j, &devclass->intf_list)
-        {
-            usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-            usb_slist_for_each(k, &intf->ep_list)
-            {
-                usbd_endpoint_t *ept = usb_slist_entry(k, struct usbd_endpoint, list);
-
-                if (ept->ep_cb) {
-                    if (ept->ep_addr & 0x80) {
-                        usbd_core_cfg.in_ep_cb[ept->ep_addr & 0x7f] = ept->ep_cb;
-                    } else {
-                        usbd_core_cfg.out_ep_cb[ept->ep_addr & 0x7f] = ept->ep_cb;
-                    }
-                }
-            }
-        }
-    }
-}
-#endif
 /**
  * @brief configure and enable endpoint
  *
@@ -204,9 +96,7 @@ static bool usbd_set_endpoint(const struct usb_endpoint_descriptor *ep_desc)
     USB_LOG_INFO("Open endpoint:0x%x type:%u mps:%u\r\n",
                  ep_cfg.ep_addr, ep_cfg.ep_type, ep_cfg.ep_mps);
 
-    usbd_ep_open(&ep_cfg);
-
-    return true;
+    return usbd_ep_open(&ep_cfg) == 0 ? true : false;
 }
 /**
  * @brief Disable endpoint for transferring data
@@ -229,9 +119,7 @@ static bool usbd_reset_endpoint(const struct usb_endpoint_descriptor *ep_desc)
     USB_LOG_INFO("Close endpoint:0x%x type:%u\r\n",
                  ep_cfg.ep_addr, ep_cfg.ep_type);
 
-    usbd_ep_close(ep_cfg.ep_addr);
-
-    return true;
+    return usbd_ep_close(ep_cfg.ep_addr) == 0 ? true : false;
 }
 
 /**
@@ -254,8 +142,8 @@ static bool usbd_get_descriptor(uint16_t type_index, uint8_t **data, uint32_t *l
     uint32_t cur_index = 0U;
     bool found = false;
 
-    type = GET_DESC_TYPE(type_index);
-    index = GET_DESC_INDEX(type_index);
+    type = HI_BYTE(type_index);
+    index = LO_BYTE(type_index);
 
     if ((type == USB_DESCRIPTOR_TYPE_STRING) && (index == USB_OSDESC_STRING_DESC_INDEX)) {
         USB_LOG_INFO("read MS OS 2.0 descriptor string\r\n");
@@ -311,14 +199,12 @@ static bool usbd_get_descriptor(uint16_t type_index, uint8_t **data, uint32_t *l
     }
 
     if (found) {
-        /* set data pointer */
+        /* found descriptor, save descriptor premiere address */
         *data = p;
 
-        /* get length from structure */
-        if (type == USB_DESCRIPTOR_TYPE_CONFIGURATION) {
-            /* configuration descriptor is an
-             * exception, length is at offset
-             * 2 and 3
+        if ((type == USB_DESCRIPTOR_TYPE_CONFIGURATION) || ((type == USB_DESCRIPTOR_TYPE_OTHER_SPEED))) {
+            /* configuration or other speed descriptor is an
+             * exception, length is at offset 2 and 3
              */
             *len = (p[CONF_DESC_wTotalLength]) |
                    (p[CONF_DESC_wTotalLength + 1] << 8);
@@ -352,12 +238,6 @@ static bool usbd_set_configuration(uint8_t config_index, uint8_t alt_setting)
     uint8_t cur_alt_setting = 0xFF;
     uint8_t cur_config = 0xFF;
     bool found = false;
-
-    if (config_index == 0U) {
-        /* TODO: unconfigure device */
-        USB_LOG_ERR("Device not configured - invalid configuration\r\n");
-        return true;
-    }
 
     /* configure endpoints for this configuration/altsetting */
     while (p[DESC_bLength] != 0U) {
@@ -454,7 +334,7 @@ static bool usbd_set_interface(uint8_t iface, uint8_t alt_setting)
         p += p[DESC_bLength];
     }
 
-    usbd_event_notify_handler(USBD_EVENT_SET_INTERFACE, (void *)if_desc);
+    usbd_class_event_notify_handler(USBD_EVENT_SET_INTERFACE, (void *)if_desc);
 
     return ret;
 }
@@ -471,95 +351,67 @@ static bool usbd_set_interface(uint8_t iface, uint8_t alt_setting)
 static bool usbd_std_device_req_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
     uint16_t value = setup->wValue;
-#if CONFIG_USBDEV_TEST_MODE
-    uint16_t index = setup->wIndex;
-#endif
     bool ret = true;
 
     switch (setup->bRequest) {
         case USB_REQUEST_GET_STATUS:
-            USB_LOG_DBG("REQ_GET_STATUS\r\n");
             /* bit 0: self-powered */
             /* bit 1: remote wakeup */
-            *data = (uint8_t *)&usbd_core_cfg.remote_wakeup;
-
+            (*data)[0] = 0x00;
+            (*data)[1] = 0x00;
             *len = 2;
             break;
 
         case USB_REQUEST_CLEAR_FEATURE:
-            USB_LOG_DBG("REQ_CLEAR_FEATURE\r\n");
-#if CONFIG_USBDEV_TEST_MODE
-            /* process for feature */
-            usbd_clear_feature(index, value);
-#endif
-            if (value == USB_FEATURE_REMOTE_WAKEUP) {
-                usbd_core_cfg.remote_wakeup = 0;
-                usbd_event_notify_handler(USBD_EVENT_CLEAR_REMOTE_WAKEUP, NULL);
-            }
-
-            break;
-
         case USB_REQUEST_SET_FEATURE:
-            USB_LOG_DBG("REQ_SET_FEATURE\r\n");
-#if CONFIG_USBDEV_TEST_MODE
-            /* process for feature */
-            usbd_set_feature(index, value);
-#endif
             if (value == USB_FEATURE_REMOTE_WAKEUP) {
-                usbd_core_cfg.remote_wakeup = 1;
-                usbd_event_notify_handler(USBD_EVENT_SET_REMOTE_WAKEUP, NULL);
+            } else if (value == USB_FEATURE_TEST_MODE) {
+#ifdef CONFIG_USBDEV_TEST_MODE
+                usbd_core_cfg.test_mode = true;
+                usbd_execute_test_mode(setup);
+#endif
             }
-
+            *len = 0;
             break;
 
         case USB_REQUEST_SET_ADDRESS:
-            USB_LOG_DBG("REQ_SET_ADDRESS, addr 0x%x\r\n", value);
             usbd_set_address(value);
+            *len = 0;
             break;
 
         case USB_REQUEST_GET_DESCRIPTOR:
-            USB_LOG_DBG("REQ_GET_DESCRIPTOR\r\n");
             ret = usbd_get_descriptor(value, data, len);
             break;
 
         case USB_REQUEST_SET_DESCRIPTOR:
-            USB_LOG_DBG("Device req 0x%02x not implemented\r\n", setup->bRequest);
             ret = false;
             break;
 
         case USB_REQUEST_GET_CONFIGURATION:
-            USB_LOG_DBG("REQ_GET_CONFIGURATION\r\n");
-            /* indicate if we are configured */
             *data = (uint8_t *)&usbd_core_cfg.configuration;
             *len = 1;
             break;
 
         case USB_REQUEST_SET_CONFIGURATION:
             value &= 0xFF;
-            USB_LOG_DBG("REQ_SET_CONFIGURATION, conf 0x%x\r\n", value);
 
             if (!usbd_set_configuration(value, 0)) {
-                USB_LOG_DBG("USB Set Configuration failed\r\n");
                 ret = false;
             } else {
-                /* configuration successful,
-                 * update current configuration
-                 */
                 usbd_core_cfg.configuration = value;
                 usbd_core_cfg.configured = true;
-                usbd_event_notify_handler(USBD_EVENT_CONFIGURED, NULL);
+                usbd_class_event_notify_handler(USBD_EVENT_CONFIGURED, NULL);
+                usbd_configure_done_callback();
             }
-
+            *len = 0;
             break;
 
         case USB_REQUEST_GET_INTERFACE:
-            break;
-
         case USB_REQUEST_SET_INTERFACE:
+            ret = false;
             break;
 
         default:
-            USB_LOG_ERR("Illegal device req 0x%02x\r\n", setup->bRequest);
             ret = false;
             break;
     }
@@ -579,49 +431,60 @@ static bool usbd_std_device_req_handler(struct usb_setup_packet *setup, uint8_t 
 static bool usbd_std_interface_req_handler(struct usb_setup_packet *setup,
                                            uint8_t **data, uint32_t *len)
 {
-    /** The device must be configured to accept standard interface
-     * requests and the addressed Interface must be valid.
-     */
-    if (!is_device_configured() ||
-        (!is_interface_valid((uint8_t)setup->wIndex))) {
+    uint8_t type = HI_BYTE(setup->wValue);
+    uint8_t intf_num = LO_BYTE(setup->wIndex);
+    bool ret = true;
+
+    /* Only when device is configured, then interface requests can be valid. */
+    if (!is_device_configured()) {
         return false;
     }
 
     switch (setup->bRequest) {
         case USB_REQUEST_GET_STATUS:
-            /* no bits specified */
-            *data = (uint8_t *)&usbd_core_cfg.remote_wakeup;
-
+            (*data)[0] = 0x00;
+            (*data)[1] = 0x00;
             *len = 2;
             break;
 
+        case USB_REQUEST_GET_DESCRIPTOR:
+            if (type == 0x22) { /* HID_DESCRIPTOR_TYPE_HID_REPORT */
+                USB_LOG_INFO("read hid report descriptor\r\n");
+                usb_slist_t *i;
+
+                usb_slist_for_each(i, &usbd_intf_head)
+                {
+                    struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
+
+                    if (intf->intf_num == intf_num) {
+                        *data = (uint8_t *)intf->hid_report_descriptor;
+                        *len = intf->hid_report_descriptor_len;
+                        return true;
+                    }
+                }
+            }
+            ret = false;
+            break;
         case USB_REQUEST_CLEAR_FEATURE:
         case USB_REQUEST_SET_FEATURE:
-            /* not defined for interface */
-            return false;
-
+            ret = false;
+            break;
         case USB_REQUEST_GET_INTERFACE:
-            /** This handler is called for classes that does not support
-             * alternate Interfaces so always return 0. Classes that
-             * support alternative interfaces handles GET_INTERFACE
-             * in custom_handler.
-             */
             (*data)[0] = 0;
-
             *len = 1;
             break;
 
         case USB_REQUEST_SET_INTERFACE:
-            USB_LOG_DBG("REQ_SET_INTERFACE\r\n");
             usbd_set_interface(setup->wIndex, setup->wValue);
+            *len = 0;
             break;
 
         default:
-            USB_LOG_ERR("Illegal interface req 0x%02x\r\n", setup->bRequest);
-            return false;
+            ret = false;
+            break;
     }
 
-    return true;
+    return ret;
 }
 
 /**
@@ -636,98 +499,54 @@ static bool usbd_std_interface_req_handler(struct usb_setup_packet *setup,
 static bool usbd_std_endpoint_req_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
     uint8_t ep = (uint8_t)setup->wIndex;
+    bool ret = true;
 
-    /* Check if request addresses valid Endpoint */
-    if (!is_ep_valid(ep)) {
+    /* Only when device is configured, then endpoint requests can be valid. */
+    if (!is_device_configured()) {
         return false;
     }
 
     switch (setup->bRequest) {
         case USB_REQUEST_GET_STATUS:
-
-            /** This request is valid for Control Endpoints when
-             * the device is not yet configured. For other
-             * Endpoints the device must be configured.
-             * Firstly check if addressed ep is Control Endpoint.
-             * If no then the device must be in Configured state
-             * to accept the request.
-             */
-            if (((ep & 0x7f) == 0) || is_device_configured()) {
-                /* bit 0 - Endpoint halted or not */
-                usbd_ep_is_stalled(ep, (uint8_t *)&usbd_core_cfg.remote_wakeup);
-                *data = (uint8_t *)&usbd_core_cfg.remote_wakeup;
-
-                *len = 2;
-                break;
-            }
-
-            return false;
-
+            (*data)[0] = 0x00;
+            (*data)[1] = 0x00;
+            *len = 2;
+            break;
         case USB_REQUEST_CLEAR_FEATURE:
             if (setup->wValue == USB_FEATURE_ENDPOINT_HALT) {
-                /** This request is valid for Control Endpoints when
-                 * the device is not yet configured. For other
-                 * Endpoints the device must be configured.
-                 * Firstly check if addressed ep is Control Endpoint.
-                 * If no then the device must be in Configured state
-                 * to accept the request.
-                 */
-                if (((ep & 0x7f) == 0) || is_device_configured()) {
-                    USB_LOG_ERR("ep:%x clear halt\r\n", ep);
+                USB_LOG_ERR("ep:%02x clear halt\r\n", ep);
 
-                    usbd_ep_clear_stall(ep);
-                    usbd_event_notify_handler(USBD_EVENT_CLEAR_HALT, NULL);
-                    break;
-                }
+                usbd_ep_clear_stall(ep);
+                break;
+            } else {
+                ret = false;
             }
-
-            /* only ENDPOINT_HALT defined for endpoints */
-            return false;
-
+            *len = 0;
+            break;
         case USB_REQUEST_SET_FEATURE:
             if (setup->wValue == USB_FEATURE_ENDPOINT_HALT) {
-                /** This request is valid for Control Endpoints when
-                 * the device is not yet configured. For other
-                 * Endpoints the device must be configured.
-                 * Firstly check if addressed ep is Control Endpoint.
-                 * If no then the device must be in Configured state
-                 * to accept the request.
-                 */
-                if (((ep & 0x7f) == 0) || is_device_configured()) {
-                    /* set HALT by stalling */
-                    USB_LOG_ERR("ep:%x set halt\r\n", ep);
+                USB_LOG_ERR("ep:%02x set halt\r\n", ep);
 
-                    usbd_ep_set_stall(ep);
-                    usbd_event_notify_handler(USBD_EVENT_SET_HALT, NULL);
-                    break;
-                }
+                usbd_ep_set_stall(ep);
+            } else {
+                ret = false;
             }
-
-            /* only ENDPOINT_HALT defined for endpoints */
-            return false;
+            *len = 0;
+            break;
 
         case USB_REQUEST_SYNCH_FRAME:
-
-            /* For Synch Frame request the device must be configured */
-            if (is_device_configured()) {
-                /* Not supported, return false anyway */
-                USB_LOG_DBG("ep req 0x%02x not implemented\r\n", setup->bRequest);
-            }
-
-            return false;
-
+            ret = false;
+            break;
         default:
-            USB_LOG_ERR("Illegal ep req 0x%02x\r\n", setup->bRequest);
-            return false;
+            ret = false;
+            break;
     }
 
-    return true;
+    return ret;
 }
 
 /**
- * @brief default handler for standard ('chapter 9') requests
- *
- * If a custom request handler was installed, this handler is called first.
+ * @brief handle standard requests (list in chapter 9)
  *
  * @param [in]     setup    The setup packet
  * @param [in,out] data     Data buffer
@@ -763,6 +582,7 @@ static int usbd_standard_request_handler(struct usb_setup_packet *setup, uint8_t
 
         default:
             rc = -1;
+            break;
     }
 
     return rc;
@@ -781,34 +601,23 @@ static int usbd_standard_request_handler(struct usb_setup_packet *setup, uint8_t
  */
 static int usbd_class_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
-    USB_LOG_DBG("bRequest 0x%02x, wIndex 0x%04x\r\n", setup->bRequest, setup->wIndex);
     usb_slist_t *i, *j;
     if ((setup->bmRequestType & USB_REQUEST_RECIPIENT_MASK) == USB_REQUEST_RECIPIENT_INTERFACE) {
-        usb_slist_for_each(i, &usbd_class_head)
+        usb_slist_for_each(i, &usbd_intf_head)
         {
-            usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
+            struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
 
-            usb_slist_for_each(j, &devclass->intf_list)
-            {
-                usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-                if (intf->class_handler && (intf->intf_num == (setup->wIndex & 0xFF))) {
-                    return intf->class_handler(setup, data, len);
-                }
+            if (intf->class_interface_handler && (intf->intf_num == (setup->wIndex & 0xFF))) {
+                return intf->class_interface_handler(setup, data, len);
             }
         }
     } else if ((setup->bmRequestType & USB_REQUEST_RECIPIENT_MASK) == USB_REQUEST_RECIPIENT_ENDPOINT) {
-        usb_slist_for_each(i, &usbd_class_head)
+        usb_slist_for_each(i, &usbd_intf_head)
         {
-            usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
+            struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
 
-            usb_slist_for_each(j, &devclass->intf_list)
-            {
-                usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-                if (intf->custom_handler && (intf->intf_num == ((setup->wIndex >> 8) & 0xFF))) {
-                    return intf->custom_handler(setup, data, len);
-                }
+            if (intf->class_endpoint_handler && (intf->intf_num == ((setup->wIndex >> 8) & 0xFF))) {
+                return intf->class_endpoint_handler(setup, data, len);
             }
         }
     }
@@ -828,13 +637,6 @@ static int usbd_class_request_handler(struct usb_setup_packet *setup, uint8_t **
  */
 static int usbd_vendor_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
-    USB_LOG_DBG("bRequest 0x%02x, wValue0x%04x, wIndex 0x%04x\r\n", setup->bRequest, setup->wValue, setup->wIndex);
-
-    // if((setup->bmRequestType & USB_REQUEST_RECIPIENT_MASK) != USB_REQUEST_RECIPIENT_DEVICE)
-    // {
-    //     return -1;
-    // }
-
     if (msosv1_desc) {
         if (setup->bRequest == msosv1_desc->vendor_code) {
             switch (setup->wIndex) {
@@ -870,19 +672,14 @@ static int usbd_vendor_request_handler(struct usb_setup_packet *setup, uint8_t *
         }
     }
 
-    usb_slist_t *i, *j;
+    usb_slist_t *i;
 
-    usb_slist_for_each(i, &usbd_class_head)
+    usb_slist_for_each(i, &usbd_intf_head)
     {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
+        struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
 
-        usb_slist_for_each(j, &devclass->intf_list)
-        {
-            usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-            if (intf->vendor_handler && !intf->vendor_handler(setup, data, len)) {
-                return 0;
-            }
+        if (intf->vendor_handler && !intf->vendor_handler(setup, data, len)) {
+            return 0;
         }
     }
 
@@ -890,49 +687,7 @@ static int usbd_vendor_request_handler(struct usb_setup_packet *setup, uint8_t *
 }
 
 /**
- * @brief handler for special requests
- *
- * If a custom request handler was installed, this handler is called first.
- *
- * @param [in]     setup    The setup packet
- * @param [in,out] data     Data buffer
- * @param [in,out] len      Pointer to data length
- *
- * @return true if the request was handled successfully
- */
-static int usbd_custom_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
-{
-    USB_LOG_DBG("bRequest 0x%02x, wIndex 0x%04x\r\n", setup->bRequest, setup->wIndex);
-
-    if ((setup->bmRequestType & USB_REQUEST_RECIPIENT_MASK) != USB_REQUEST_RECIPIENT_INTERFACE) {
-        return -1;
-    }
-
-    usb_slist_t *i, *j;
-    usb_slist_for_each(i, &usbd_class_head)
-    {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
-
-        usb_slist_for_each(j, &devclass->intf_list)
-        {
-            usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-            if (intf->custom_handler && (intf->intf_num == (setup->wIndex & 0xFF))) {
-                return intf->custom_handler(setup, data, len);
-            }
-        }
-    }
-
-    return -1;
-}
-
-/**
- * @brief handle a request by calling one of the installed request handlers
- *
- * Local function to handle a request by calling one of the installed request
- * handlers. In case of data going from host to device, the data is at *ppbData.
- * In case of data going from device to host, the handler can either choose to
- * write its data at *ppbData or update the data pointer.
+ * @brief handle setup request( standard/class/vendor/other)
  *
  * @param [in]     setup The setup packet
  * @param [in,out] data  Data buffer
@@ -942,92 +697,98 @@ static int usbd_custom_request_handler(struct usb_setup_packet *setup, uint8_t *
  */
 static bool usbd_setup_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
-    uint8_t type = setup->bmRequestType & USB_REQUEST_TYPE_MASK;
+    switch (setup->bmRequestType & USB_REQUEST_TYPE_MASK) {
+        case USB_REQUEST_STANDARD:
+            if (usbd_standard_request_handler(setup, data, len) < 0) {
+                USB_LOG_ERR("standard request error\r\n");
+                usbd_print_setup(setup);
+                return false;
+            }
+            break;
+        case USB_REQUEST_CLASS:
+            if (usbd_class_request_handler(setup, data, len) < 0) {
+                USB_LOG_ERR("class request error\r\n");
+                usbd_print_setup(setup);
+                return false;
+            }
+            break;
+        case USB_REQUEST_VENDOR:
+            if (usbd_vendor_request_handler(setup, data, len) < 0) {
+                USB_LOG_ERR("vendor request error\r\n");
+                usbd_print_setup(setup);
+                return false;
+            }
+            break;
 
-    if (!usbd_custom_request_handler(setup, data, len)) {
-        return true;
-    }
-
-    if (type == USB_REQUEST_STANDARD) {
-        if (usbd_standard_request_handler(setup, data, len) < 0) {
-            USB_LOG_ERR("standard request error\r\n");
-            usbd_print_setup(setup);
+        default:
             return false;
-        }
-    } else if (type == USB_REQUEST_CLASS) {
-        if (usbd_class_request_handler(setup, data, len) < 0) {
-            USB_LOG_ERR("class request error\r\n");
-            usbd_print_setup(setup);
-            return false;
-        }
-    } else if (type == USB_REQUEST_VENDOR) {
-        if (usbd_vendor_request_handler(setup, data, len) < 0) {
-            USB_LOG_ERR("vendor request error\r\n");
-            usbd_print_setup(setup);
-            return false;
-        }
-    } else {
-        return false;
     }
 
     return true;
 }
-/**
- * @brief send data or status to host
- *
- * @return N/A
- */
-static void usbd_send_to_host(uint16_t len)
+
+static void usbd_class_event_notify_handler(uint8_t event, void *arg)
 {
-    uint32_t chunk = 0U;
+    usb_slist_t *i;
+    usb_slist_for_each(i, &usbd_intf_head)
+    {
+        struct usbd_interface *intf = usb_slist_entry(i, struct usbd_interface, list);
 
-    if (usbd_core_cfg.zlp_flag == false) {
-        chunk = usbd_core_cfg.ep0_data_buf_residue;
-
-        if (usbd_ep_write(USB_CONTROL_IN_EP0, usbd_core_cfg.ep0_data_buf, usbd_core_cfg.ep0_data_buf_residue, &chunk) < 0) {
-            USB_LOG_ERR("USB write data failed\r\n");
-            return;
-        }
-
-        usbd_core_cfg.ep0_data_buf += chunk;
-        usbd_core_cfg.ep0_data_buf_residue -= chunk;
-
-        /*
-         * Set ZLP flag when host asks for a bigger length and the
-         * last chunk is wMaxPacketSize long, to indicate the last
-         * packet.
-         */
-        if (!usbd_core_cfg.ep0_data_buf_residue && (len > usbd_core_cfg.ep0_data_buf_len) && !(usbd_core_cfg.ep0_data_buf_len % USB_CTRL_EP_MPS)) {
-            /* Transfers a zero-length packet next*/
-            usbd_core_cfg.zlp_flag = true;
-        }
-    } else {
-        usbd_core_cfg.zlp_flag = false;
-        USB_LOG_DBG("send zlp\r\n");
-        if (usbd_ep_write(USB_CONTROL_IN_EP0, NULL, 0, NULL) < 0) {
-            USB_LOG_ERR("USB write zlp failed\r\n");
-            return;
+        if (intf->notify_handler) {
+            intf->notify_handler(event, arg);
         }
     }
 }
 
-static void usbd_ep0_setup_handler(void)
+void usbd_event_connect_handler(void)
+{
+    usbd_class_event_notify_handler(USBD_EVENT_CONNECTED, NULL);
+}
+
+void usbd_event_disconnect_handler(void)
+{
+    usbd_class_event_notify_handler(USBD_EVENT_DISCONNECTED, NULL);
+}
+
+void usbd_event_resume_handler(void)
+{
+    usbd_class_event_notify_handler(USBD_EVENT_RESUME, NULL);
+}
+
+void usbd_event_suspend_handler(void)
+{
+    usbd_class_event_notify_handler(USBD_EVENT_SUSPEND, NULL);
+}
+
+void usbd_event_reset_handler(void)
+{
+    usbd_set_address(0);
+    usbd_core_cfg.configured = 0;
+    usbd_core_cfg.configuration = 0;
+#ifdef CONFIG_USBDEV_TEST_MODE
+    usbd_core_cfg.test_mode = false;
+#endif
+    struct usbd_endpoint_cfg ep0_cfg;
+
+    ep0_cfg.ep_mps = USB_CTRL_EP_MPS;
+    ep0_cfg.ep_type = USB_ENDPOINT_TYPE_CONTROL;
+    ep0_cfg.ep_addr = USB_CONTROL_IN_EP0;
+    usbd_ep_open(&ep0_cfg);
+
+    ep0_cfg.ep_addr = USB_CONTROL_OUT_EP0;
+    usbd_ep_open(&ep0_cfg);
+
+    usbd_class_event_notify_handler(USBD_EVENT_RESET, NULL);
+}
+
+void usbd_event_ep0_setup_complete_handler(uint8_t *psetup)
 {
     struct usb_setup_packet *setup = &usbd_core_cfg.setup;
 
-    /*
-    * OUT transfer, Setup packet,
-    * reset request message state machine
-    */
-    if (usbd_ep_read(USB_CONTROL_OUT_EP0, (uint8_t *)setup,
-                     sizeof(struct usb_setup_packet), NULL) < 0) {
-        USB_LOG_ERR("Read Setup Packet failed\r\n");
-        usbd_ep_set_stall(USB_CONTROL_IN_EP0);
-        return;
-    }
-
-    //usbd_print_setup(setup);
-
+    memcpy(setup, psetup, 8);
+#ifdef CONFIG_USBDEV_SETUP_LOG_PRINT
+    usbd_print_setup(setup);
+#endif
     if (setup->wLength > CONFIG_USBDEV_REQUEST_BUFFER_LEN) {
         if ((setup->bmRequestType & USB_REQUEST_DIR_MASK) == USB_REQUEST_DIR_OUT) {
             USB_LOG_ERR("Request buffer too small\r\n");
@@ -1041,231 +802,124 @@ static void usbd_ep0_setup_handler(void)
     usbd_core_cfg.ep0_data_buf_len = setup->wLength;
     usbd_core_cfg.zlp_flag = false;
 
-    /* this maybe set code in class request code  */
-    if (setup->wLength &&
-        (setup->bmRequestType & USB_REQUEST_DIR_MASK) == USB_REQUEST_DIR_OUT) {
-        USB_LOG_DBG("prepare to out data\r\n");
+    /* handle class request when all the data is received */
+    if (setup->wLength && ((setup->bmRequestType & USB_REQUEST_DIR_MASK) == USB_REQUEST_DIR_OUT)) {
+        USB_LOG_DBG("Start reading %d bytes from ep0\r\n", setup->wLength);
+        usbd_ep_start_read(USB_CONTROL_OUT_EP0, usbd_core_cfg.ep0_data_buf, setup->wLength);
         return;
     }
 
     /* Ask installed handler to process request */
     if (!usbd_setup_request_handler(setup, &usbd_core_cfg.ep0_data_buf, &usbd_core_cfg.ep0_data_buf_len)) {
-        USB_LOG_ERR("usbd_setup_request_handler failed\r\n");
         usbd_ep_set_stall(USB_CONTROL_IN_EP0);
         return;
     }
-
+#ifdef CONFIG_USBDEV_TEST_MODE
+    /* send status in test mode, so do not execute downward, just return */
+    if (usbd_core_cfg.test_mode) {
+        usbd_core_cfg.test_mode = false;
+        return;
+    }
+#endif
     /* Send smallest of requested and offered length */
     usbd_core_cfg.ep0_data_buf_residue = MIN(usbd_core_cfg.ep0_data_buf_len,
                                              setup->wLength);
-    /*Send data or status to host*/
-    usbd_send_to_host(setup->wLength);
-}
 
-static void usbd_ep0_out_handler(void)
-{
-    uint32_t chunk = 0U;
-    struct usb_setup_packet *setup = &usbd_core_cfg.setup;
-
-    /* OUT transfer, status packets */
-    if (usbd_core_cfg.ep0_data_buf_residue == 0) {
-        /* absorb zero-length status message */
-        USB_LOG_DBG("recv status\r\n");
-
-        if (usbd_ep_read(USB_CONTROL_OUT_EP0,
-                         NULL,
-                         0, NULL) < 0) {
-            USB_LOG_ERR("Read DATA Packet failed\r\n");
-            usbd_ep_set_stall(USB_CONTROL_IN_EP0);
-        }
-
-        return;
-    }
-
-    /* OUT transfer, data packets */
-    if (usbd_ep_read(USB_CONTROL_OUT_EP0,
-                     usbd_core_cfg.ep0_data_buf,
-                     usbd_core_cfg.ep0_data_buf_residue, &chunk) < 0) {
-        USB_LOG_ERR("Read DATA Packet failed\r\n");
-        usbd_ep_set_stall(USB_CONTROL_IN_EP0);
-        return;
-    }
-
-    usbd_core_cfg.ep0_data_buf += chunk;
-    usbd_core_cfg.ep0_data_buf_residue -= chunk;
-
-    if (usbd_core_cfg.ep0_data_buf_residue == 0) {
-        /* Received all, send data to handler */
-        usbd_core_cfg.ep0_data_buf = usbd_core_cfg.req_data;
-
-        if (!usbd_setup_request_handler(setup, &usbd_core_cfg.ep0_data_buf, &usbd_core_cfg.ep0_data_buf_len)) {
-            USB_LOG_ERR("usbd_setup_request_handler1 failed\r\n");
-            usbd_ep_set_stall(USB_CONTROL_IN_EP0);
+    /* check if the data buf addr matches align size,if not, copy into align buf */
+#ifndef CONFIG_USBDEV_ALIGN_CHECK_DISABLE
+    if (((unsigned long)usbd_core_cfg.ep0_data_buf) & (CONFIG_USB_ALIGN_SIZE - 1)) {
+        if (usbd_core_cfg.ep0_data_buf_residue > CONFIG_USBDEV_REQUEST_BUFFER_LEN) {
+            USB_LOG_ERR("Request buffer too small\r\n");
             return;
         }
-
-        /*Send status to host*/
-        usbd_send_to_host(setup->wLength);
-    } else {
+        /* copy data buf from misalignx addr to alignx addr */
+        memcpy(usbd_core_cfg.req_data, usbd_core_cfg.ep0_data_buf, usbd_core_cfg.ep0_data_buf_residue);
+        usbd_core_cfg.ep0_data_buf = usbd_core_cfg.req_data;
+    }
+#endif
+    /* Send data or status to host */
+    usbd_ep_start_write(USB_CONTROL_IN_EP0, usbd_core_cfg.ep0_data_buf, usbd_core_cfg.ep0_data_buf_residue);
+    /*
+    * Set ZLP flag when host asks for a bigger length and the data size is multiplier of USB_CTRL_EP_MPS,
+    * to indicate the transfer done after zlp sent.
+    */
+    if ((setup->wLength > usbd_core_cfg.ep0_data_buf_len) && (!(usbd_core_cfg.ep0_data_buf_len % USB_CTRL_EP_MPS))) {
+        usbd_core_cfg.zlp_flag = true;
+        USB_LOG_DBG("EP0 Set zlp\r\n");
     }
 }
 
-static void usbd_ep0_in_handler(void *arg)
+void usbd_event_ep_in_complete_handler(uint8_t ep, uint32_t nbytes)
 {
-    struct usb_setup_packet *setup = &usbd_core_cfg.setup;
+    if (ep == USB_CONTROL_IN_EP0) {
+        struct usb_setup_packet *setup = &usbd_core_cfg.setup;
 
-    /* Send more data if available */
-    if (usbd_core_cfg.ep0_data_buf_residue != 0 || usbd_core_cfg.zlp_flag == true) {
-        usbd_send_to_host(setup->wLength);
-        if (arg != NULL)
-        {
-            *(uint8_t *)arg = 1;
-        }
-        
-    } else {
-        /*ep0 tx has completed,and no data to send,so do nothing*/
-        if (arg != NULL)
-        {
-            *(uint8_t *)arg = 0;
-        }
-    }
-}
+        usbd_core_cfg.ep0_data_buf += nbytes;
+        usbd_core_cfg.ep0_data_buf_residue -= nbytes;
 
-static void usbd_ep_out_handler(uint8_t ep)
-{
-#if USBD_EP_CALLBACK_SEARCH_METHOD == USBD_EP_CALLBACK_LIST_SEARCH
-    usb_slist_t *i, *j, *k;
-    usb_slist_for_each(i, &usbd_class_head)
-    {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
+        USB_LOG_DBG("EP0 send %d bytes, %d remained\r\n", nbytes, usbd_core_cfg.ep0_data_buf_residue);
 
-        usb_slist_for_each(j, &devclass->intf_list)
-        {
-            usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
-
-            usb_slist_for_each(k, &intf->ep_list)
-            {
-                usbd_endpoint_t *ept = usb_slist_entry(k, struct usbd_endpoint, list);
-
-                if ((ept->ep_addr == ep) && ept->ep_cb) {
-                    ept->ep_cb(ep);
+        if (usbd_core_cfg.ep0_data_buf_residue != 0) {
+            /* Start sending the remain data */
+            usbd_ep_start_write(USB_CONTROL_IN_EP0, usbd_core_cfg.ep0_data_buf, usbd_core_cfg.ep0_data_buf_residue);
+        } else {
+            if (usbd_core_cfg.zlp_flag == true) {
+                usbd_core_cfg.zlp_flag = false;
+                /* Send zlp to host */
+                USB_LOG_DBG("EP0 Send zlp\r\n");
+                usbd_ep_start_write(USB_CONTROL_IN_EP0, NULL, 0);
+            } else {
+                /* Satisfying three conditions will jump here.
+                * 1. send status completely
+                * 2. send zlp completely
+                * 3. send last data completely.
+                */
+                if (setup->wLength && ((setup->bmRequestType & USB_REQUEST_DIR_MASK) == USB_REQUEST_DIR_IN)) {
+                    /* if all data has sent completely, start reading out status */
+                    usbd_ep_start_read(USB_CONTROL_OUT_EP0, NULL, 0);
                 }
             }
         }
+    } else {
+        if (usbd_core_cfg.in_ep_cb[ep & 0x7f]) {
+            usbd_core_cfg.in_ep_cb[ep & 0x7f](ep, nbytes);
+        }
     }
-#else
-
-    if (usbd_core_cfg.out_ep_cb[ep & 0x7f]) {
-        usbd_core_cfg.out_ep_cb[ep & 0x7f](ep);
-    }
-
-#endif
 }
 
-static void usbd_ep_in_handler(uint8_t ep)
+void usbd_event_ep_out_complete_handler(uint8_t ep, uint32_t nbytes)
 {
-#if USBD_EP_CALLBACK_SEARCH_METHOD == USBD_EP_CALLBACK_LIST_SEARCH
-    usb_slist_t *i, *j, *k;
-    usb_slist_for_each(i, &usbd_class_head)
-    {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
+    if (ep == USB_CONTROL_OUT_EP0) {
+        struct usb_setup_packet *setup = &usbd_core_cfg.setup;
 
-        usb_slist_for_each(j, &devclass->intf_list)
-        {
-            usbd_interface_t *intf = usb_slist_entry(j, struct usbd_interface, list);
+        if (nbytes > 0) {
+            usbd_core_cfg.ep0_data_buf += nbytes;
+            usbd_core_cfg.ep0_data_buf_residue -= nbytes;
 
-            usb_slist_for_each(k, &intf->ep_list)
-            {
-                usbd_endpoint_t *ept = usb_slist_entry(k, struct usbd_endpoint, list);
+            USB_LOG_DBG("EP0 recv %d bytes, %d remained\r\n", nbytes, usbd_core_cfg.ep0_data_buf_residue);
 
-                if ((ept->ep_addr == ep) && ept->ep_cb) {
-                    ept->ep_cb(ep);
+            if (usbd_core_cfg.ep0_data_buf_residue == 0) {
+                /* Received all, send data to handler */
+                usbd_core_cfg.ep0_data_buf = usbd_core_cfg.req_data;
+                if (!usbd_setup_request_handler(setup, &usbd_core_cfg.ep0_data_buf, &usbd_core_cfg.ep0_data_buf_len)) {
+                    usbd_ep_set_stall(USB_CONTROL_IN_EP0);
+                    return;
                 }
+
+                /*Send status to host*/
+                usbd_ep_start_write(USB_CONTROL_IN_EP0, NULL, 0);
+            } else {
+                /* Start reading the remain data */
+                usbd_ep_start_read(USB_CONTROL_OUT_EP0, usbd_core_cfg.ep0_data_buf, usbd_core_cfg.ep0_data_buf_residue);
             }
+        } else {
+            /* Read out status completely, do nothing */
+            USB_LOG_DBG("EP0 recv out status\r\n");
         }
-    }
-#else
-
-    if (usbd_core_cfg.in_ep_cb[ep & 0x7f]) {
-        usbd_core_cfg.in_ep_cb[ep & 0x7f](ep);
-    }
-
-#endif
-}
-
-static void usbd_class_event_notify_handler(uint8_t event, void *arg)
-{
-    usb_slist_t *i, *j;
-    usb_slist_for_each(i, &usbd_class_head)
-    {
-        usbd_class_t *devclass = usb_slist_entry(i, struct usbd_class, list);
-        usbd_interface_t *intf = usb_slist_first_entry(&devclass->intf_list, struct usbd_interface, list);
-
-        if (intf->notify_handler) {
-            intf->notify_handler(event, arg);
+    } else {
+        if (usbd_core_cfg.out_ep_cb[ep & 0x7f]) {
+            usbd_core_cfg.out_ep_cb[ep & 0x7f](ep, nbytes);
         }
-    }
-}
-
-void usbd_event_notify_handler(uint8_t event, void *arg)
-{
-    switch (event) {
-        case USBD_EVENT_RESET:
-            usbd_set_address(0);
-            usbd_core_cfg.configured = 0;
-            usbd_core_cfg.configuration = 0;
-            struct usbd_endpoint_cfg ep0_cfg;
-            ep0_cfg.ep_mps = USB_CTRL_EP_MPS;
-            ep0_cfg.ep_type = USB_ENDPOINT_TYPE_CONTROL;
-            ep0_cfg.ep_addr = USB_CONTROL_IN_EP0;
-            /*set USB_CONTROL_IN_EP0 nak*/
-            usbd_ep_open(&ep0_cfg);
-
-            ep0_cfg.ep_addr = USB_CONTROL_OUT_EP0;
-            /*set USB_CONTROL_OUT_EP0 ack to prepare receiving setup data*/
-            usbd_ep_open(&ep0_cfg);
-#if USBD_EP_CALLBACK_SEARCH_METHOD == USBD_EP_CALLBACK_ARR_SEARCH
-            usbd_ep_callback_register();
-#endif
-
-        case USBD_EVENT_ERROR:
-        case USBD_EVENT_SOF:
-        case USBD_EVENT_CONNECTED:
-        case USBD_EVENT_CONFIGURED:
-        case USBD_EVENT_SUSPEND:
-        case USBD_EVENT_DISCONNECTED:
-        case USBD_EVENT_RESUME:
-        case USBD_EVENT_SET_INTERFACE:
-        case USBD_EVENT_SET_REMOTE_WAKEUP:
-        case USBD_EVENT_CLEAR_REMOTE_WAKEUP:
-        case USBD_EVENT_SET_HALT:
-        case USBD_EVENT_CLEAR_HALT:
-            usbd_class_event_notify_handler(event, arg);
-            break;
-
-        case USBD_EVENT_SETUP_NOTIFY:
-            usbd_ep0_setup_handler();
-            break;
-
-        case USBD_EVENT_EP0_IN_NOTIFY:
-            usbd_ep0_in_handler(arg);
-            break;
-
-        case USBD_EVENT_EP0_OUT_NOTIFY:
-            usbd_ep0_out_handler();
-            break;
-
-        case USBD_EVENT_EP_IN_NOTIFY:
-            usbd_ep_in_handler((uint32_t)arg);
-            break;
-
-        case USBD_EVENT_EP_OUT_NOTIFY:
-            usbd_ep_out_handler((uint32_t)arg);
-            break;
-
-        default:
-            USB_LOG_ERR("USB unknown event: %d\r\n", event);
-            break;
     }
 }
 
@@ -1273,6 +927,7 @@ void usbd_desc_register(const uint8_t *desc)
 {
     usbd_core_cfg.descriptors = desc;
 }
+
 /* Register MS OS Descriptors version 1 */
 void usbd_msosv1_desc_register(struct usb_msosv1_descriptor *desc)
 {
@@ -1290,24 +945,22 @@ void usbd_bos_desc_register(struct usb_bos_descriptor *desc)
     bos_desc = desc;
 }
 
-void usbd_class_register(usbd_class_t *devclass)
-{
-    usb_slist_add_tail(&usbd_class_head, &devclass->list);
-    usb_slist_init(&devclass->intf_list);
-}
-
-void usbd_class_add_interface(usbd_class_t *devclass, usbd_interface_t *intf)
+void usbd_add_interface(struct usbd_interface *intf)
 {
     static uint8_t intf_offset = 0;
+
     intf->intf_num = intf_offset;
-    usb_slist_add_tail(&devclass->intf_list, &intf->list);
-    usb_slist_init(&intf->ep_list);
+    usb_slist_add_tail(&usbd_intf_head, &intf->list);
     intf_offset++;
 }
 
-void usbd_interface_add_endpoint(usbd_interface_t *intf, usbd_endpoint_t *ep)
+void usbd_add_endpoint(struct usbd_endpoint *ep)
 {
-    usb_slist_add_tail(&intf->ep_list, &ep->list);
+    if (ep->ep_addr & 0x80) {
+        usbd_core_cfg.in_ep_cb[ep->ep_addr & 0x7f] = ep->ep_cb;
+    } else {
+        usbd_core_cfg.out_ep_cb[ep->ep_addr & 0x7f] = ep->ep_cb;
+    }
 }
 
 bool usb_device_is_configured(void)
@@ -1317,16 +970,5 @@ bool usb_device_is_configured(void)
 
 int usbd_initialize(void)
 {
-    usb_dc_init();
-    return 0;
+    return usb_dc_init();
 }
-
-#if CONFIG_USBDEV_TEST_MODE
-__WEAK void usbd_set_feature(uint16_t index, uint16_t value)
-{
-}
-
-__WEAK void usbd_clear_feature(uint16_t index, uint16_t value)
-{
-}
-#endif

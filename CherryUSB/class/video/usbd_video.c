@@ -1,39 +1,24 @@
-/**
- * @file usbd_video.c
- * @brief
+/*
+ * Copyright (c) 2022, sakumisu
  *
- * Copyright (c) 2022 sakumisu
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "usbd_core.h"
 #include "usbd_video.h"
+
+struct video_entity_info {
+    uint8_t bDescriptorSubtype;
+    uint8_t bEntityId;
+    uint16_t wTerminalType;
+};
 
 struct usbd_video_cfg_priv {
     struct video_probe_and_commit_controls probe;
     struct video_probe_and_commit_controls commit;
     uint8_t power_mode;
     uint8_t error_code;
-    uint8_t vcintf;
-    uint8_t vsintf;
     struct video_entity_info info[3];
 } usbd_video_cfg = {
-    .vcintf = 0xff,
-    .vsintf = 0xff,
     .info[0] = { .bDescriptorSubtype = VIDEO_VC_INPUT_TERMINAL_DESCRIPTOR_SUBTYPE, .bEntityId = 0x01, .wTerminalType = VIDEO_ITT_CAMERA },
     .info[1] = { .bDescriptorSubtype = VIDEO_VC_OUTPUT_TERMINAL_DESCRIPTOR_SUBTYPE, .bEntityId = 0x03, .wTerminalType = 0x00 },
     .info[2] = { .bDescriptorSubtype = VIDEO_VC_PROCESSING_UNIT_DESCRIPTOR_SUBTYPE, .bEntityId = 0x02, .wTerminalType = 0x00 },
@@ -674,7 +659,7 @@ static int usbd_video_stream_request_handler(struct usb_setup_packet *setup, uin
     return 0;
 }
 
-static int video_class_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
+static int video_class_interface_request_handler(struct usb_setup_packet *setup, uint8_t **data, uint32_t *len)
 {
     USB_LOG_DBG("Video Class request: "
                 "bRequest 0x%02x\r\n",
@@ -683,13 +668,13 @@ static int video_class_request_handler(struct usb_setup_packet *setup, uint8_t *
     uint8_t intf_num = (uint8_t)setup->wIndex;
     uint8_t entity_id = (uint8_t)(setup->wIndex >> 8);
 
-    if (usbd_video_cfg.vcintf == intf_num) { /* Video Control Interface */
+    if (intf_num == 0) { /* Video Control Interface */
         if (entity_id == 0) {
             return usbd_video_control_request_handler(setup, data, len); /* Interface Control Requests */
         } else {
             return usbd_video_control_unit_terminal_request_handler(setup, data, len); /* Unit and Terminal Requests */
         }
-    } else if (usbd_video_cfg.vsintf == intf_num) {                 /* Video Stream Inteface */
+    } else if (intf_num == 1) {                                     /* Video Stream Inteface */
         return usbd_video_stream_request_handler(setup, data, len); /* Interface Stream Requests */
     }
     return -1;
@@ -701,10 +686,6 @@ static void video_notify_handler(uint8_t event, void *arg)
         case USBD_EVENT_RESET:
             usbd_video_cfg.error_code = 0;
             usbd_video_cfg.power_mode = 0;
-            break;
-
-        case USBD_EVENT_SOF:
-            usbd_video_sof_callback();
             break;
 
         case USBD_EVENT_SET_INTERFACE: {
@@ -719,28 +700,6 @@ static void video_notify_handler(uint8_t event, void *arg)
         break;
         default:
             break;
-    }
-}
-
-void usbd_video_add_interface(usbd_class_t *class, usbd_interface_t *intf)
-{
-    static usbd_class_t *last_class = NULL;
-
-    if (last_class != class) {
-        last_class = class;
-        usbd_class_register(class);
-    }
-
-    intf->class_handler = video_class_request_handler;
-    intf->custom_handler = NULL;
-    intf->vendor_handler = NULL;
-    intf->notify_handler = video_notify_handler;
-    usbd_class_add_interface(class, intf);
-
-    if (usbd_video_cfg.vcintf == 0xff) {
-        usbd_video_cfg.vcintf = intf->intf_num;
-    } else if (usbd_video_cfg.vsintf == 0xff) {
-        usbd_video_cfg.vsintf = intf->intf_num;
     }
 }
 
@@ -783,6 +742,23 @@ void usbd_video_probe_and_commit_controls_init(uint32_t dwFrameInterval, uint32_
     usbd_video_cfg.commit.bMaxVersion = 0;
 }
 
+struct usbd_interface *usbd_video_alloc_intf(uint32_t dwFrameInterval, uint32_t dwMaxVideoFrameSize, uint32_t dwMaxPayloadTransferSize)
+{
+    struct usbd_interface *intf = usb_malloc(sizeof(struct usbd_interface));
+    if (intf == NULL) {
+        USB_LOG_ERR("no mem to alloc intf\r\n");
+        return NULL;
+    }
+
+    intf->class_interface_handler = video_class_interface_request_handler;
+    intf->class_endpoint_handler = NULL;
+    intf->vendor_handler = NULL;
+    intf->notify_handler = video_notify_handler;
+
+    usbd_video_probe_and_commit_controls_init(dwFrameInterval, dwMaxVideoFrameSize, dwMaxPayloadTransferSize);
+    return intf;
+}
+
 uint32_t usbd_video_mjpeg_payload_fill(uint8_t *input, uint32_t input_len, uint8_t *output, uint32_t *out_len)
 {
     uint32_t packets;
@@ -812,8 +788,4 @@ void usbd_video_mjpeg_payload_header_toggle(uint8_t *output, uint32_t packets)
     for (size_t i = 0; i < packets; i++) {
         output[usbd_video_cfg.probe.dwMaxPayloadTransferSize * i + 1] ^= 0x01;
     }
-}
-
-__WEAK void usbd_video_sof_callback(void)
-{
 }

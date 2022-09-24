@@ -48,8 +48,7 @@
 #include "nrf_drv_power.h"
 #include "app_uart.h"
 #include "bsp_cli.h"
-#include "nrf_cli_uart.h" 
-
+#include "nrf_cli_uart.h"
 
 #define CDC_DEMO
 /**
@@ -62,35 +61,11 @@ NRF_CLI_DEF(m_cli_uart,
             '\r',
             4);
 
-static void init_power_clock(void)
-{
-    ret_code_t ret;
-    /* Initializing power and clock */
-    ret = nrf_drv_clock_init();
-    APP_ERROR_CHECK(ret);
-    ret = nrf_drv_power_init(NULL);
-    APP_ERROR_CHECK(ret);
-    nrf_drv_clock_hfclk_request(NULL);
-    nrf_drv_clock_lfclk_request(NULL);
-    while (!(nrf_drv_clock_hfclk_is_running() &&
-            nrf_drv_clock_lfclk_is_running()))
-    {
-        /* Just waiting */
-    }
-
-    ret = app_timer_init();
-    APP_ERROR_CHECK(ret);
-
-    /* Avoid warnings if assertion is disabled */
-    UNUSED_VARIABLE(ret);
-}
-
-
 #define UART_HWFC APP_UART_FLOW_CONTROL_DISABLED
-#define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE 256                         /**< UART RX buffer size. */
+#define UART_TX_BUF_SIZE 256 /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE 256 /**< UART RX buffer size. */
 
-void uart_error_handle(app_uart_evt_t * p_event)
+void uart_error_handle(app_uart_evt_t *p_event)
 {
     if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
     {
@@ -102,23 +77,60 @@ void uart_error_handle(app_uart_evt_t * p_event)
     }
 }
 
-
-
-void usb_dc_low_level_init(void)
+void usb_dc_low_level_post_init(void)
 {
-	 /* Enable interrupt globally */
-   NRFX_IRQ_PRIORITY_SET(USBD_IRQn, NRFX_USBD_CONFIG_IRQ_PRIORITY);
-   NRFX_IRQ_ENABLE(USBD_IRQn);
+    /* Enable interrupt globally */
+    NRFX_IRQ_PRIORITY_SET(USBD_IRQn, NRFX_USBD_CONFIG_IRQ_PRIORITY);
+    NRFX_IRQ_ENABLE(USBD_IRQn);
+}
 
-   /* Enable pullups */
-   nrf_usbd_pullup_enable();
+extern void cherry_usb_hal_nrf_power_event(uint32_t event);
+static void power_event_handler(nrfx_power_usb_evt_t event)
+{
+    cherry_usb_hal_nrf_power_event((uint32_t)event);
+}
+
+void usb_dc_low_level_pre_init(void)
+{
+    uint32_t usb_reg;
+    const nrfx_power_usbevt_config_t config = {.handler = power_event_handler};
+    nrfx_power_usbevt_init(&config);
+    nrfx_power_usbevt_enable();
+    usb_reg = NRF_POWER->USBREGSTATUS;
+
+    if (usb_reg & POWER_USBREGSTATUS_VBUSDETECT_Msk)
+    {
+        cherry_usb_hal_nrf_power_event(NRFX_POWER_USB_EVT_DETECTED);
+    }
+
+    volatile uint32_t count = 10000;
+    while (count--)
+    {
+    }
+		
+    if (usb_reg & POWER_USBREGSTATUS_OUTPUTRDY_Msk)
+    {
+        cherry_usb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
+    }
+}
+
+void usb_clear_pending_irq(void)
+{
+    NVIC_ClearPendingIRQ(USBD_IRQn);
+}
+
+void usb_disable_irq(void)
+{
+    NVIC_DisableIRQ(USBD_IRQn);
 }
 
 int main(void)
 {
     uint32_t err_code;
     UNUSED_RETURN_VALUE(NRF_LOG_INIT(NULL));
-    init_power_clock();
+    nrf_drv_clock_init();
+    nrf_drv_power_init(NULL);
+    app_timer_init();
 
     const app_uart_comm_params_t comm_params =
     {
@@ -145,26 +157,37 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     printf("USBD example started. \r\n");
-	
+
 #ifdef CDC_DEMO
     extern void cdc_acm_init(void);
     cdc_acm_init();
-		printf("cdc acm example started. \r\n");
+    printf("cdc acm example started. \r\n");
     nrf_delay_ms(5000);
 #elif defined MSC_DEMO
     extern void msc_ram_init(void);
     msc_ram_init();
-		printf("msc ram example started. \r\n");
+    printf("msc ram example started. \r\n");
     nrf_delay_ms(5000);
 #elif defined HID_DEMO
+    extern void hid_keyboard_init(void);
+    hid_keyboard_init();
     printf("hid keyboard example started. \r\n");
+    nrf_delay_ms(5000);
+#elif defined CDC_MULTI_DEMO
+    extern void cdc_acm_multi_init(void);
+    cdc_acm_multi_init();
+    nrf_delay_ms(5000);
 #endif
 
     while (true)
     {
-			#ifdef CDC_DEMO
-			extern void cdc_acm_data_send_with_dtr_test(void);
-			cdc_acm_data_send_with_dtr_test();
-			#endif
+#ifdef CDC_DEMO
+        extern void cdc_acm_data_send_with_dtr_test(void);
+        cdc_acm_data_send_with_dtr_test();
+#elif defined(HID_DEMO)
+        extern void hid_keyboard_test(void);
+        hid_keyboard_test();
+        nrf_delay_ms(2000);
+#endif
     }
 }

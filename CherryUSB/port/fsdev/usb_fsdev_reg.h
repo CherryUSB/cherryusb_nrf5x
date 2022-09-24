@@ -34,6 +34,10 @@ typedef struct
   __IO uint16_t RESERVEDB;            /*!< Reserved */
   __IO uint16_t BTABLE;               /*!< Buffer Table address register,             Address offset: 0x50 */
   __IO uint16_t RESERVEDC;            /*!< Reserved */
+  __IO uint16_t LPMCSR;               /*!< LPM Control and Status register,           Address offset: 0x54 */
+  __IO uint16_t RESERVEDD;            /*!< Reserved */
+  __IO uint16_t BCDR;                 /*!< Battery Charging detector register,        Address offset: 0x58 */
+  __IO uint16_t RESERVEDE;            /*!< Reserved */
 } USB_TypeDef;
 
 /******************************************************************************/
@@ -592,6 +596,23 @@ typedef struct
 #define USB_BTABLE_BTABLE_Msk                   (0x1FFFUL << USB_BTABLE_BTABLE_Pos) /*!< 0x0000FFF8 */
 #define USB_BTABLE_BTABLE                       USB_BTABLE_BTABLE_Msk          /*!< Buffer Table */
 
+/******************  Bits definition for USB_BCDR register  *******************/
+#define USB_BCDR_BCDEN                           ((uint16_t)0x0001U)           /*!< Battery charging detector (BCD) enable */
+#define USB_BCDR_DCDEN                           ((uint16_t)0x0002U)           /*!< Data contact detection (DCD) mode enable */
+#define USB_BCDR_PDEN                            ((uint16_t)0x0004U)           /*!< Primary detection (PD) mode enable */
+#define USB_BCDR_SDEN                            ((uint16_t)0x0008U)           /*!< Secondary detection (SD) mode enable */
+#define USB_BCDR_DCDET                           ((uint16_t)0x0010U)           /*!< Data contact detection (DCD) status */
+#define USB_BCDR_PDET                            ((uint16_t)0x0020U)           /*!< Primary detection (PD) status */
+#define USB_BCDR_SDET                            ((uint16_t)0x0040U)           /*!< Secondary detection (SD) status */
+#define USB_BCDR_PS2DET                          ((uint16_t)0x0080U)           /*!< PS2 port or proprietary charger detected */
+#define USB_BCDR_DPPU                            ((uint16_t)0x8000U)           /*!< DP Pull-up Enable */
+
+/*******************  Bit definition for LPMCSR register  *********************/
+#define USB_LPMCSR_LMPEN                         ((uint16_t)0x0001U)           /*!< LPM support enable  */
+#define USB_LPMCSR_LPMACK                        ((uint16_t)0x0002U)           /*!< LPM Token acknowledge enable*/
+#define USB_LPMCSR_REMWAKE                       ((uint16_t)0x0008U)           /*!< bRemoteWake value received with last ACKed LPM Token */
+#define USB_LPMCSR_BESL                          ((uint16_t)0x00F0U)           /*!< BESL value received with last ACKed LPM Token  */
+
 /*!< Buffer descriptor table */
 /*****************  Bit definition for USB_ADDR0_TX register  *****************/
 #define USB_ADDR0_TX_ADDR0_TX_Pos               (1U)
@@ -1107,39 +1128,15 @@ typedef struct
 
 #define USB_COUNT7_RX_1_BLSIZE_1                0x80000000U                    /*!< BLock SIZE (high) */
 
-/** @defgroup USB_LL_EP0_MPS USB Low Layer EP0 MPS
-  * @{
-  */
-#define EP_MPS_64                              0U
-#define EP_MPS_32                              1U
-#define EP_MPS_16                              2U
-#define EP_MPS_8                               3U
-/**
-  * @}
-  */
-
-/** @defgroup USB_LL_EP_Type USB Low Layer EP Type
-  * @{
-  */
-#define EP_TYPE_CTRL                           0U
-#define EP_TYPE_ISOC                           1U
-#define EP_TYPE_BULK                           2U
-#define EP_TYPE_INTR                           3U
-#define EP_TYPE_MSK                            3U
-/**
-  * @}
-  */
-
-/** @defgroup USB_LL Device Speed
-  * @{
-  */
-#define USBD_FS_SPEED                          2U
 /**
   * @}
   */
 
 #define BTABLE_ADDRESS                         0x000U
+
+#ifndef PMA_ACCESS
 #define PMA_ACCESS                             2U
+#endif
 /********************  Bit definition for USB_COUNTn_RX register  *************/
 #define USB_CNTRX_NBLK_MSK                    (0x1FU << 10)
 #define USB_CNTRX_BLSIZE                      (0x1U << 15)

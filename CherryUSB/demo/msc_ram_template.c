@@ -89,6 +89,11 @@ const uint8_t msc_ram_descriptor[] = {
     0x00
 };
 
+void usbd_configure_done_callback(void)
+{
+    /* do nothing */
+}
+
 #define BLOCK_SIZE  512
 #define BLOCK_COUNT 10
 
@@ -128,7 +133,7 @@ int usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length)
 void msc_ram_init(void)
 {
     usbd_desc_register(msc_ram_descriptor);
-    usbd_msc_class_init(MSC_OUT_EP, MSC_IN_EP);
+    usbd_add_interface(usbd_msc_alloc_intf(MSC_OUT_EP, MSC_IN_EP));
 
     usbd_initialize();
 }

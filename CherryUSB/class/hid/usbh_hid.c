@@ -1,24 +1,7 @@
-/**
- * @file usbh_hid.c
- * @brief
+/*
+ * Copyright (c) 2022, sakumisu
  *
- * Copyright (c) 2022 sakumisu
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "usbh_core.h"
 #include "usbh_hid.h"
@@ -26,6 +9,8 @@
 #define DEV_FORMAT "/dev/input%d"
 
 static uint32_t g_devinuse = 0;
+
+USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t g_hid_buf[128];
 
 /****************************************************************************
  * Name: usbh_hid_devno_alloc
@@ -76,7 +61,7 @@ static void usbh_hid_devno_free(struct usbh_hid *hid_class)
 
 static int usbh_hid_get_report_descriptor(struct usbh_hid *hid_class, uint8_t *buffer)
 {
-    struct usb_setup_packet *setup = hid_class->hport->setup;
+    struct usb_setup_packet *setup = &hid_class->hport->setup;
     int ret;
 
     setup->bmRequestType = USB_REQUEST_DIR_IN | USB_REQUEST_STANDARD | USB_REQUEST_RECIPIENT_INTERFACE;
@@ -85,31 +70,36 @@ static int usbh_hid_get_report_descriptor(struct usbh_hid *hid_class, uint8_t *b
     setup->wIndex = hid_class->intf;
     setup->wLength = 128;
 
-    return usbh_control_transfer(hid_class->hport->ep0, setup, buffer);
+    ret = usbh_control_transfer(hid_class->hport->ep0, setup, g_hid_buf);
+    if (ret < 0) {
+        return ret;
+    }
+    memcpy(buffer, g_hid_buf, ret - 8);
+    return ret;
 }
 
 int usbh_hid_set_idle(struct usbh_hid *hid_class, uint8_t report_id, uint8_t duration)
 {
-    struct usb_setup_packet *setup = hid_class->hport->setup;
-    int ret;
+    struct usb_setup_packet *setup = &hid_class->hport->setup;
 
     setup->bmRequestType = USB_REQUEST_DIR_OUT | USB_REQUEST_CLASS | USB_REQUEST_RECIPIENT_INTERFACE;
     setup->bRequest = HID_REQUEST_SET_IDLE;
-    setup->wValue = report_id;
-    setup->wIndex = (duration << 8) | hid_class->intf;
+    //setup->wValue = report_id;
+    //setup->wIndex = (duration << 8) | hid_class->intf;
+    /* wValue, high-bytes sets the duration, or the max amount of time between reports 
+                  0x00 = hid will send a report only when report data has changed or duration time elapsed
+               low-bytes indicate the report id that the requeset applies to */
+    setup->wValue = (duration << 8) | report_id;
+    /* wIndex, num of interface that supports the request */
+    setup->wIndex = hid_class->intf;
     setup->wLength = 0;
 
-    ret = usbh_control_transfer(hid_class->hport->ep0, setup, NULL);
-    if (ret < 0) {
-        return ret;
-    }
-
-    return 0;
+    return usbh_control_transfer(hid_class->hport->ep0, setup, NULL);
 }
 
 int usbh_hid_get_idle(struct usbh_hid *hid_class, uint8_t *buffer)
 {
-    struct usb_setup_packet *setup = hid_class->hport->setup;
+    struct usb_setup_packet *setup = &hid_class->hport->setup;
     int ret;
 
     setup->bmRequestType = USB_REQUEST_DIR_IN | USB_REQUEST_CLASS | USB_REQUEST_RECIPIENT_INTERFACE;
@@ -118,17 +108,29 @@ int usbh_hid_get_idle(struct usbh_hid *hid_class, uint8_t *buffer)
     setup->wIndex = hid_class->intf;
     setup->wLength = 1;
 
-    ret = usbh_control_transfer(hid_class->hport->ep0, setup, buffer);
+    ret = usbh_control_transfer(hid_class->hport->ep0, setup, g_hid_buf);
     if (ret < 0) {
         return ret;
     }
+    memcpy(buffer, g_hid_buf, 1);
+    return ret;
+}
 
-    return 0;
+int usbh_hid_set_protocol(struct usbh_hid *hid_class, uint8_t protocol)
+{
+    struct usb_setup_packet *setup = &hid_class->hport->setup;
+
+    setup->bmRequestType = USB_REQUEST_DIR_OUT | USB_REQUEST_CLASS | USB_REQUEST_RECIPIENT_INTERFACE;
+    setup->bRequest = HID_REQUEST_SET_PROTOCOL;
+    setup->wValue = protocol;
+    setup->wIndex = 0;
+    setup->wLength = 0;   
+
+    return usbh_control_transfer(hid_class->hport->ep0, setup, NULL);     
 }
 
 int usbh_hid_connect(struct usbh_hubport *hport, uint8_t intf)
 {
-    struct usbh_endpoint_cfg ep_cfg = { 0 };
     struct usb_endpoint_descriptor *ep_desc;
     int ret;
 
@@ -139,45 +141,41 @@ int usbh_hid_connect(struct usbh_hubport *hport, uint8_t intf)
     }
 
     memset(hid_class, 0, sizeof(struct usbh_hid));
+    usbh_hid_devno_alloc(hid_class);
     hid_class->hport = hport;
     hid_class->intf = intf;
-    
-    usbh_hid_devno_alloc(hid_class);
-    snprintf(hport->config.intf[intf].devname, CONFIG_USBHOST_DEV_NAMELEN, DEV_FORMAT, hid_class->minor);
 
     hport->config.intf[intf].priv = hid_class;
+
+    // /* 0x0 = boot protocol, 0x1 = report protocol */
+    // ret = usbh_hid_set_protocol(hid_class, 0x1);
+    // if (ret < 0) {
+    //     return ret;
+    // }
 
     ret = usbh_hid_set_idle(hid_class, 0, 0);
     if (ret < 0) {
         return ret;
     }
 
-    uint8_t *report_buffer = usb_iomalloc(128);
-    ret = usbh_hid_get_report_descriptor(hid_class, report_buffer);
+    ret = usbh_hid_get_report_descriptor(hid_class, hid_class->report_desc);
     if (ret < 0) {
-        usb_iofree(report_buffer);
         return ret;
     }
-    usb_iofree(report_buffer);
 
-    for (uint8_t i = 0; i < hport->config.intf[intf].intf_desc.bNumEndpoints; i++) {
-        ep_desc = &hport->config.intf[intf].ep[i].ep_desc;
-        ep_cfg.ep_addr = ep_desc->bEndpointAddress;
-        ep_cfg.ep_type = ep_desc->bmAttributes & USB_ENDPOINT_TYPE_MASK;
-        ep_cfg.ep_mps = ep_desc->wMaxPacketSize;
-        ep_cfg.ep_interval = ep_desc->bInterval;
-        ep_cfg.hport = hport;
+    for (uint8_t i = 0; i < hport->config.intf[intf].altsetting[0].intf_desc.bNumEndpoints; i++) {
+        ep_desc = &hport->config.intf[intf].altsetting[0].ep[i].ep_desc;
         if (ep_desc->bEndpointAddress & 0x80) {
-            usbh_ep_alloc(&hid_class->intin, &ep_cfg);
+            usbh_hport_activate_epx(&hid_class->intin, hport, ep_desc);
         } else {
-            usbh_ep_alloc(&hid_class->intout, &ep_cfg);
+            usbh_hport_activate_epx(&hid_class->intout, hport, ep_desc);
         }
     }
 
+    snprintf(hport->config.intf[intf].devname, CONFIG_USBHOST_DEV_NAMELEN, DEV_FORMAT, hid_class->minor);
+
     USB_LOG_INFO("Register HID Class:%s\r\n", hport->config.intf[intf].devname);
 
-    extern int hid_test();
-    hid_test();
     return 0;
 }
 
@@ -191,25 +189,18 @@ int usbh_hid_disconnect(struct usbh_hubport *hport, uint8_t intf)
         usbh_hid_devno_free(hid_class);
 
         if (hid_class->intin) {
-            ret = usb_ep_cancel(hid_class->intin);
-            if (ret < 0) {
-            }
-            usbh_ep_free(hid_class->intin);
+            usbh_pipe_free(hid_class->intin);
         }
 
         if (hid_class->intout) {
-            ret = usb_ep_cancel(hid_class->intout);
-            if (ret < 0) {
-            }
-            usbh_ep_free(hid_class->intout);
+            usbh_pipe_free(hid_class->intout);
         }
 
+        memset(hid_class, 0, sizeof(struct usbh_hid));
         usb_free(hid_class);
 
-        USB_LOG_INFO("Unregister HID Class:%s\r\n", hport->config.intf[intf].devname);
-
-        memset(hport->config.intf[intf].devname, 0, CONFIG_USBHOST_DEV_NAMELEN);
-        hport->config.intf[intf].priv = NULL;
+        if (hport->config.intf[intf].devname[0] != '\0')
+            USB_LOG_INFO("Unregister HID Class:%s\r\n", hport->config.intf[intf].devname);
     }
 
     return ret;

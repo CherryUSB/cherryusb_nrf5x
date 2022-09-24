@@ -44,4 +44,6 @@
 // TODO - temporary redirection
 #include <sdk_config.h>
 
+#define NRFX_NVMC_ENABLED   1
+
 #endif // NRFX_CONFIG_H__
